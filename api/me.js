@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('users')
-      .select('id, kakao_id, nickname, is_admin, is_banned, banned_reason, banned_at')
+      .select('id, kakao_id, nickname, is_admin, is_banned, banned_reason, banned_at, training_preference')
       .eq('id', session.userId)
       .single();
 
@@ -42,6 +42,7 @@ export default async function handler(req, res) {
       kakaoId: data.kakao_id,
       nickname: data.nickname,
       isAdmin: data.is_admin,
+      trainingPreference: data.training_preference || null,
     });
   } catch (e) {
     console.error('me error', e);

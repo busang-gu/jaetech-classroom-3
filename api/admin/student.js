@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     const { data: student, error: uErr } = await supabase
       .from('users')
-      .select('id, kakao_id, nickname, is_admin, is_banned, banned_at, banned_reason, last_login_at, created_at')
+      .select('id, kakao_id, nickname, is_admin, is_banned, banned_at, banned_reason, training_preference, last_login_at, created_at')
       .eq('id', id)
       .maybeSingle();
 

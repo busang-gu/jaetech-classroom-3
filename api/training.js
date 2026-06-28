@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('users')
-      .select('id, kakao_id, nickname, is_admin, training_status, created_at')
+      .select('id, kakao_id, nickname, is_admin, training_status, training_preference, created_at')
       .order('created_at', { ascending: true });
 
     if (error) throw error;
@@ -27,6 +27,7 @@ export default async function handler(req, res) {
       kakao_id: u.kakao_id,
       nickname: u.nickname,
       training_status: u.training_status || 'pending',
+      training_preference: u.training_preference || null,
     }));
 
     // 집계

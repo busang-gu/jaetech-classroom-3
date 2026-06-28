@@ -257,6 +257,82 @@ header.site .wrap {
   line-height: 1.4;
 }
 
+/* ===== Training Preference Card ===== */
+.pref-card {
+  background: linear-gradient(135deg, #EFF6FF 0%, #F0FAE9 100%);
+  border: 1.5px solid rgba(59, 130, 246, 0.28);
+  border-radius: 18px;
+  padding: 22px clamp(20px, 3vw, 28px);
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+.pref-head { text-align: center; margin-bottom: 16px; }
+.pref-badge {
+  display: inline-block;
+  background: rgba(59, 130, 246, 0.12);
+  color: #1E40AF;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 5px 12px; border-radius: 999px;
+  margin-bottom: 8px;
+}
+.pref-ttl {
+  font-size: clamp(16px, 2.2vw, 19px);
+  font-weight: 900; color: #0F172A;
+  margin: 0 0 4px; letter-spacing: -0.01em;
+}
+.pref-sub {
+  font-size: 12.5px; color: #64748B;
+  line-height: 1.55; margin: 0;
+}
+.pref-buttons {
+  display: grid; gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+.pref-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 16px 8px;
+  background: #fff;
+  border: 1.5px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.15s, background 0.15s;
+}
+.pref-btn:hover { transform: translateY(-1px); border-color: rgba(59, 130, 246, 0.3); }
+.pref-btn .pref-icn { font-size: 22px; }
+.pref-btn .pref-label {
+  font-size: 14px; font-weight: 800; color: #0F172A;
+}
+.pref-btn .pref-time {
+  font-size: 11px; color: #94A3B8; font-weight: 600;
+}
+.pref-btn.active {
+  background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+  border-color: #1E40AF;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+}
+.pref-btn.active .pref-label,
+.pref-btn.active .pref-time { color: #fff; }
+.pref-btn.active .pref-time { opacity: 0.85; }
+.pref-btn:disabled { opacity: 0.5; pointer-events: none; }
+.pref-status {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(34, 197, 94, 0.10);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 10px;
+  font-size: 12.5px; color: #166534;
+  text-align: center;
+}
+.pref-status .check {
+  display: inline-block;
+  width: 18px; height: 18px;
+  background: #22c55e; color: #fff;
+  border-radius: 50%; line-height: 18px;
+  font-size: 10px; font-weight: 900;
+  margin-right: 6px;
+}
+
 /* ===== Training Highlight Card ===== */
 .training-card {
   display: flex;
@@ -810,6 +886,49 @@ document.addEventListener('auth-ready', function(e) {
     if (a) a.style.display = '';
   }
 
+  // ===== 트레이닝 선호 시간 카드 =====
+  function renderPref(pref) {
+    const btnWd = document.getElementById('pref-weekday');
+    const btnWk = document.getElementById('pref-weekend');
+    const status = document.getElementById('pref-status');
+    const statusText = document.getElementById('pref-status-text');
+    if (!btnWd || !btnWk) return;
+    btnWd.classList.toggle('active', pref === 'weekday');
+    btnWk.classList.toggle('active', pref === 'weekend');
+    if (pref) {
+      const label = pref === 'weekday' ? '평일' : '주말';
+      if (statusText) statusText.textContent = `'${label}' 선호로 등록됨`;
+      if (status) status.style.display = '';
+    } else {
+      if (status) status.style.display = 'none';
+    }
+  }
+
+  // 초기 상태 반영
+  renderPref(u.trainingPreference);
+
+  // 버튼 클릭 → API 호출
+  async function setPref(pref) {
+    const buttons = document.querySelectorAll('.pref-btn');
+    buttons.forEach(b => b.disabled = true);
+    try {
+      const res = await fetch('/api/training-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preference: pref }),
+      });
+      if (!res.ok) throw new Error('save failed');
+      const { preference } = await res.json();
+      renderPref(preference);
+    } catch (err) {
+      alert('저장 실패. 다시 시도해주세요.');
+    } finally {
+      buttons.forEach(b => b.disabled = false);
+    }
+  }
+  document.getElementById('pref-weekday')?.addEventListener('click', () => setPref('weekday'));
+  document.getElementById('pref-weekend')?.addEventListener('click', () => setPref('weekend'));
+
   // 트레이닝 현황 — 진행 중 + 예정 인원 표시
   fetch('/api/training', { cache: 'no-store' })
     .then(r => r.ok ? r.json() : null)
@@ -862,6 +981,30 @@ document.addEventListener('auth-ready', function(e) {
 <!-- ===== Quick Links ===== -->
 <section class="bg-base" style="padding-top: clamp(36px, 5vw, 56px); padding-bottom: clamp(36px, 5vw, 56px);">
   <div class="wrap">
+    <!-- 트레이닝 선호 시간 선택 카드 -->
+    <div class="pref-card reveal" id="training-pref-card">
+      <div class="pref-head">
+        <span class="pref-badge">🗓 트레이닝 선호 시간</span>
+        <h3 class="pref-ttl">평일 / 주말 중 편한 쪽 골라주세요</h3>
+        <p class="pref-sub">금융쌤이 트레이닝 일정 잡을 때 반영해 드려요. 언제든 다시 바꿀 수 있어요.</p>
+      </div>
+      <div class="pref-buttons">
+        <button class="pref-btn" data-pref="weekday" id="pref-weekday">
+          <span class="pref-icn">💼</span>
+          <span class="pref-label">평일</span>
+          <span class="pref-time">월~금 저녁</span>
+        </button>
+        <button class="pref-btn" data-pref="weekend" id="pref-weekend">
+          <span class="pref-icn">🌞</span>
+          <span class="pref-label">주말</span>
+          <span class="pref-time">토·일 낮</span>
+        </button>
+      </div>
+      <div class="pref-status" id="pref-status" style="display:none;">
+        <span class="check">✓</span> <b id="pref-status-text">선택 완료</b> · 일정 잡힐 때 우선 반영
+      </div>
+    </div>
+
     <!-- 트레이닝 현황표 강조 카드 -->
     <a class="training-card reveal" href="./training.html" id="training-card-link">
       <div class="left">
@@ -992,23 +1135,12 @@ document.addEventListener('auth-ready', function(e) {
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>ISA·연금저축·IRP 절세 활용법</li>
           </ul>
 
-          <div class="vod-slot" data-week="2" data-yt="Me34jMduweI">
-            <button class="vod-link" type="button" aria-label="WEEK 02 강의 영상 재생">
-              <img src="https://i.ytimg.com/vi/Me34jMduweI/maxresdefault.jpg" alt="WEEK 02 — 평생 흔들리지 않는 자산 구조" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/Me34jMduweI/hqdefault.jpg'">
-              <span class="play-btn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </span>
-              <span class="vod-caption">▶ 재생 · WEEK 02</span>
-            </button>
-          </div>
-
-          <div class="week-notice">
-            <div class="notice-tag">📢 추가 자료 안내</div>
-            <p>
-              2027년 기준 <b>AI 서버 사용량이 거의 2배</b>로 뜁니다. 공급 부족이 더 심해질 거예요.<br>
-              그래서 AI 인프라 관련 <b>증시 급락 대비 긴급 라이브 강의</b>를 미리 찍어왔어요.<br>
-              <b>2주차 과제까지 다 끝낸 분은 금융쌤님에게 개인톡으로 말씀주세요</b> — 같이 부자될 수 있게 바로 전달드릴게요 🔥
-            </p>
+          <div class="vod-slot" data-week="2">
+            <div class="ph">
+              <div class="em">⏰</div>
+              <div class="ttl">7월 6일(월) 오픈 예정</div>
+              <div class="desc">2주차 강의는 7/6에 공개됩니다</div>
+            </div>
           </div>
         </div>
       </article>
@@ -1029,22 +1161,12 @@ document.addEventListener('auth-ready', function(e) {
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>어떤 집을 사야하는지</li>
           </ul>
 
-          <div class="vod-slot" data-week="3" data-yt="5Qk0_SNobzo">
-            <button class="vod-link" type="button" aria-label="WEEK 03 강의 영상 재생">
-              <img src="https://i.ytimg.com/vi/5Qk0_SNobzo/maxresdefault.jpg" alt="WEEK 03 — 내 집 마련 기초" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/5Qk0_SNobzo/hqdefault.jpg'">
-              <span class="play-btn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </span>
-              <span class="vod-caption">▶ 재생 · WEEK 03</span>
-            </button>
-          </div>
-
-          <div class="week-notice">
-            <div class="notice-tag">📢 작은 정정 한 줄</div>
-            <p>
-              영상 <b>34:34</b> 부근에서 일산 학원가를 "후곡·마곡"이라고 했는데, 정확히는 <b>후곡과 백마학원가</b>예요. 서울 마곡이랑 잠깐 헷갈렸어요 😅<br>
-              일산 임장 갈 분들은 <b>후곡 + 백마</b> 기준으로 봐주세요!
-            </p>
+          <div class="vod-slot" data-week="3">
+            <div class="ph">
+              <div class="em">⏰</div>
+              <div class="ttl">7월 13일(월) 오픈 예정</div>
+              <div class="desc">3주차 강의는 7/13에 공개됩니다</div>
+            </div>
           </div>
         </div>
       </article>
@@ -1064,14 +1186,12 @@ document.addEventListener('auth-ready', function(e) {
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>효율적인 임장 방법</li>
           </ul>
 
-          <div class="vod-slot" data-week="4" data-yt="zNAr_KZRAFI">
-            <button class="vod-link" type="button" aria-label="WEEK 04 강의 영상 재생">
-              <img src="https://i.ytimg.com/vi/zNAr_KZRAFI/maxresdefault.jpg" alt="WEEK 04 — 나만의 똘똘한 1채 찾기" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/zNAr_KZRAFI/hqdefault.jpg'">
-              <span class="play-btn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              </span>
-              <span class="vod-caption">▶ 재생 · WEEK 04</span>
-            </button>
+          <div class="vod-slot" data-week="4">
+            <div class="ph">
+              <div class="em">⏰</div>
+              <div class="ttl">7월 20일(월) 오픈 예정</div>
+              <div class="desc">4주차 강의는 7/20에 공개됩니다</div>
+            </div>
           </div>
         </div>
       </article>

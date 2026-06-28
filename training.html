@@ -288,6 +288,24 @@ main { padding: 28px 0 80px; }
 .student-name .nick { font-weight: 700; color: var(--text-primary); font-size: 13px; }
 .student-name .me { font-size: 10px; color: var(--color-secondary-dark); font-weight: 800; letter-spacing: 0.04em; }
 
+/* 선호 시간 배지 */
+.pref-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #EFF6FF;
+  color: #1E40AF;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.pref-pill.empty {
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+  border-color: var(--border-soft);
+  font-weight: 500;
+}
+
 /* 상태 표시 (조회 전용) */
 .status-icon {
   display: inline-flex; align-items: center; justify-content: center;
@@ -418,11 +436,12 @@ body.is-admin .status-icon { display: none; }
           <thead>
             <tr>
               <th>수강생</th>
+              <th class="center" style="width: 80px;">선호</th>
               <th class="center" style="width: 160px;">트레이닝</th>
             </tr>
           </thead>
           <tbody id="students-tbody">
-            <tr><td colspan="2" class="empty-state">불러오는 중…</td></tr>
+            <tr><td colspan="3" class="empty-state">불러오는 중…</td></tr>
           </tbody>
         </table>
       </div>
@@ -488,6 +507,12 @@ function renderRow(s) {
     </div>
   `;
 
+  const prefMap = { weekday: { icon: '💼', label: '평일' }, weekend: { icon: '🌞', label: '주말' } };
+  const prefData = prefMap[s.training_preference];
+  const prefCell = prefData
+    ? `<span class="pref-pill">${prefData.icon} ${prefData.label}</span>`
+    : `<span class="pref-pill empty">—</span>`;
+
   return `
     <tr data-student-id="${escapeHtml(s.id)}">
       <td>
@@ -498,6 +523,7 @@ function renderRow(s) {
           </div>
         </div>
       </td>
+      <td style="text-align:center;">${prefCell}</td>
       <td style="text-align:center;">${statusIcon}${toggle}</td>
     </tr>
   `;

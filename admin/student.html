@@ -859,10 +859,13 @@ function renderProfile(student, byWeek) {
     `<span id="profile-status" class="status-badge ${status.cls}">${status.label}</span>`;
 
   const submitted = [1,2,3,4].filter(n => byWeek[n]?.status === 'submitted').length;
+  const prefMap = { weekday: '💼 평일', weekend: '🌞 주말' };
+  const prefLabel = prefMap[student.training_preference] || '<span style="color:var(--text-muted);">미선택</span>';
   document.getElementById('profile-details').innerHTML = `
     <span class="item">가입일 · <b>${fmtDate(student.created_at)}</b></span>
     <span class="item">마지막 로그인 · <b>${relativeTime(student.last_login_at)}</b></span>
     <span class="item">총 제출 · <b>${submitted}건</b></span>
+    <span class="item">트레이닝 선호 · <b>${prefLabel}</b></span>
     <span class="item">결제 · <b>3만원 (완주 시 환급 예정)</b></span>
   `;
 
