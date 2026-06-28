@@ -912,7 +912,7 @@ document.addEventListener('auth-ready', function(e) {
     const buttons = document.querySelectorAll('.pref-btn');
     buttons.forEach(b => b.disabled = true);
     try {
-      const res = await fetch('/api/training-preference', {
+      const res = await fetch('/api/training', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ preference: pref }),
