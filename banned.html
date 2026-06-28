@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>접근 차단 — 재테크 라운지</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0F172A;
+  color: #E2E8F0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.box {
+  max-width: 460px;
+  width: 100%;
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+.em { font-size: 56px; margin-bottom: 16px; line-height: 1; }
+h1 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #FCA5A5;
+  letter-spacing: -0.01em;
+}
+.desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #CBD5E1;
+  margin: 0 0 24px;
+}
+.reason-box {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 0 0 24px;
+  text-align: left;
+}
+.reason-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #94A3B8;
+  margin-bottom: 6px;
+}
+.reason-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #F1F5F9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.contact {
+  font-size: 12.5px;
+  color: #94A3B8;
+  line-height: 1.7;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(126, 217, 87, 0.08);
+  border: 1px solid rgba(126, 217, 87, 0.2);
+  margin-bottom: 20px;
+}
+.contact b { color: #BBF7D0; font-weight: 800; }
+.btn {
+  display: inline-block;
+  width: 100%;
+  padding: 13px 16px;
+  background: #475569;
+  color: #F1F5F9;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn:hover { background: #64748B; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="em">🚫</div>
+  <h1>강의실 접근이 차단되었습니다</h1>
+  <p class="desc">
+    재테크 라운지 1기 강의실 이용이 중단되었어요.<br>
+    아래 사유를 확인해주세요.
+  </p>
+
+  <div class="reason-box" id="reason-box" style="display:none;">
+    <div class="reason-label">📌 사유</div>
+    <div class="reason-text" id="reason-text"></div>
+  </div>
+
+  <div class="contact">
+    문의가 있다면 <b>부상구 인스타 DM</b>으로 연락 주세요.<br>
+    상황을 다시 검토해드릴게요.
+  </div>
+
+  <a class="btn" href="/login.html">로그인 화면으로</a>
+</div>
+
+<script>
+(function() {
+  const params = new URLSearchParams(location.search);
+  const reason = params.get('reason');
+  if (reason) {
+    document.getElementById('reason-text').textContent = reason;
+    document.getElementById('reason-box').style.display = '';
+  }
+})();
+</script>
+</body>
+</html>

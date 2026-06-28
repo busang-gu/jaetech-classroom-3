@@ -1,0 +1,10 @@
+{
+  "name": "jaetech-classroom-3",
+  "version": "3.0.0",
+  "private": true,
+  "description": "재테크 라운지 3기 강의실 — 카카오 로그인 + Supabase 백엔드",
+  "dependencies": {
+    "jose": "^5.9.6",
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

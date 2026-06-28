@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>로그인 — 재테크 라운지 강의실</title>
+<meta name="description" content="재테크 라운지 수강생 전용 강의실. 카카오 계정으로 로그인하세요.">
+<meta name="robots" content="noindex, nofollow">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #1E40AF;
+  --color-secondary: #7ED957;
+  --kakao-bg: #FEE500;
+  --kakao-text: #191919;
+  --surface-base: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-green-soft: #F0FAE9;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --border-soft: #E2E8F0;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: linear-gradient(180deg, var(--surface-subtle) 0%, var(--surface-green-soft) 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.logo .dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+}
+.brand-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 28px;
+}
+
+h1 {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+.desc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+.kakao-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--kakao-bg);
+  color: var(--kakao-text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.kakao-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(254, 229, 0, 0.4);
+}
+.kakao-btn:active {
+  transform: translateY(0);
+}
+.kakao-icon {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+}
+
+.fine {
+  margin-top: 22px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.alert {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #991B1B;
+  font-size: 13px;
+  text-align: left;
+}
+.alert-icon { font-weight: 800; margin-right: 6px; }
+
+.divider {
+  margin: 24px 0;
+  height: 1px;
+  background: var(--border-soft);
+}
+
+.notice {
+  background: var(--surface-subtle);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  text-align: left;
+}
+.notice b { color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<main class="card">
+  <div class="logo">
+    재테크 라운지<span class="dot"></span>
+  </div>
+  <div class="brand-sub">강의실 · 내 집도, 은퇴도</div>
+
+  <h1>수강생 로그인</h1>
+  <p class="desc">재테크 라운지 수강생 전용 페이지예요.<br>카카오 계정으로 1초 만에 입장하세요.</p>
+
+  <div id="alert" class="alert" style="display:none;">
+    <span class="alert-icon">!</span><span id="alert-msg"></span>
+  </div>
+
+  <a id="kakao-login" class="kakao-btn" href="/api/auth/kakao">
+    <svg class="kakao-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.86 5.33 4.65 6.74-.2.75-.74 2.77-.85 3.2-.13.55.2.54.43.39.18-.12 2.85-1.94 4.01-2.73.58.08 1.17.13 1.76.13 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+    </svg>
+    카카오로 시작하기
+  </a>
+
+  <div class="divider"></div>
+
+  <div class="notice">
+    <b>처음 들어오시나요?</b><br>
+    카카오 로그인 한 번이면 끝이에요. 별도 회원가입은 없어요. 다음 방문부터는 자동으로 들어옵니다.
+  </div>
+
+  <p class="fine">로그인 시 닉네임만 받아가요. 다른 정보는 저장하지 않습니다.</p>
+</main>
+
+<script>
+(function() {
+  // 에러 메시지 표시
+  const errMap = {
+    no_code: '로그인이 취소되었어요. 다시 시도해주세요.',
+    token_failed: '카카오 인증에 실패했어요. 잠시 후 다시 시도해주세요.',
+    user_failed: '사용자 정보를 가져오지 못했어요.',
+    server_error: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+    access_denied: '로그인이 취소되었어요.',
+    not_admin: '관리자 권한이 필요한 페이지예요.',
+  };
+  const params = new URLSearchParams(location.search);
+  const err = params.get('err');
+  if (err) {
+    document.getElementById('alert').style.display = 'block';
+    document.getElementById('alert-msg').textContent = errMap[err] || '로그인에 실패했어요. 다시 시도해주세요.';
+  }
+  // returnTo 보존 — 로그인 후 원래 가려던 페이지로
+  const ret = params.get('return');
+  if (ret) {
+    const btn = document.getElementById('kakao-login');
+    btn.href = '/api/auth/kakao?return=' + encodeURIComponent(ret);
+  }
+})();
+</script>
+
+</body>
+</html>

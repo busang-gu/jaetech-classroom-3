@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 과제 — 재테크 라운지 강의실</title>
+<meta name="description" content="재테크 라운지 3기 과제 게시판 — 본인 과제 작성·제출·관리.">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- 인증 게이트 -->
+<style id="auth-gate-style">html { visibility: hidden; }</style>
+<script>
+(async function authGate() {
+  try {
+    const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+    if (!r.ok) throw new Error('unauth');
+    const user = await r.json();
+    if (user.banned) {
+      const q = user.reason ? '?reason=' + encodeURIComponent(user.reason) : '';
+      location.replace('/banned.html' + q);
+      return;
+    }
+    window.__user = user;
+    document.documentElement.style.visibility = 'visible';
+    var fireReady = function() { document.dispatchEvent(new CustomEvent('auth-ready', { detail: user })); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireReady);
+    } else {
+      fireReady();
+    }
+  } catch {
+    location.replace('/login.html?return=' + encodeURIComponent(location.pathname + location.search));
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #1E40AF;
+  --color-primary-soft: #DBEAFE;
+  --color-secondary: #7ED957;
+  --color-secondary-dark: #5A9E3F;
+  --color-secondary-soft: #DCFCE7;
+  --color-accent: #FFD700;
+  --color-accent-dark: #D4A017;
+  --color-urgent: #EF4444;
+  --color-urgent-soft: #FEF2F2;
+
+  --surface-base: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-soft: #FFF9F0;
+  --surface-green-soft: #F0FAE9;
+  --surface-blue-soft: #EFF6FF;
+  --surface-dark: #0D1B2A;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  --border-subtle: rgba(15,23,42,.08);
+  --border-soft: #E2E8F0;
+  --border-medium: #CBD5E1;
+
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.06), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-lg: 0 12px 32px rgba(15,23,42,.10), 0 4px 10px rgba(15,23,42,.06);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-subtle);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+@media (min-width: 768px) { .wrap { padding: 0 32px; } }
+
+/* ===== Header ===== */
+.site-header {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+.brand-row { display: flex; align-items: baseline; gap: 10px; }
+.brand { font-size: 18px; font-weight: 900; letter-spacing: -0.02em; color: var(--text-primary); }
+.brand .dot { color: var(--color-secondary-dark); }
+.brand-sub { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.nav-links { display: flex; align-items: center; gap: 14px; }
+.nav-links a { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+.nav-links a:hover { color: var(--text-primary); }
+.nav-links a.active { color: var(--text-primary); font-weight: 800; }
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted);
+  padding-left: 14px; margin-left: 4px;
+  border-left: 1px solid var(--border-soft);
+}
+.nav-user .nick { font-weight: 700; color: var(--text-secondary); }
+.nav-user a { text-decoration: underline; font-size: 11px; color: var(--text-muted); }
+@media (max-width: 640px) {
+  .nav-links a:not(.active) { display: none; }
+}
+
+/* ===== Hero ===== */
+.page-hero {
+  background: linear-gradient(135deg, var(--surface-blue-soft) 0%, var(--surface-green-soft) 100%);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 36px 0 32px;
+}
+.page-hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-base);
+  color: var(--color-primary-dark);
+  font-size: 12px; font-weight: 800;
+  padding: 4px 11px; border-radius: 999px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(59,130,246,0.2);
+}
+.page-hero h1 {
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -0.02em; line-height: 1.3;
+  margin: 0 0 6px;
+}
+@media (min-width: 768px) { .page-hero h1 { font-size: 32px; } }
+.page-hero .sub { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+/* ===== Stats Bar ===== */
+.stats-section {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 20px 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.stat-card {
+  text-align: center;
+  padding: 4px 8px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.stat-value small {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+.stat-card.next .stat-value { color: var(--color-urgent); font-size: 16px; }
+.stat-card.completed .stat-value { color: var(--color-secondary-dark); }
+.stat-card.streak .stat-value { color: var(--color-accent-dark); font-size: 16px; }
+.stat-card.streak .stat-value::before { content: '🔥 '; }
+.stat-card.percent .stat-value { color: var(--color-primary); }
+
+/* ===== Progress bar (page-level) ===== */
+.progress-bar-mini {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.progress-bar-mini .seg {
+  height: 5px;
+  background: var(--border-soft);
+  border-radius: 3px;
+}
+.progress-bar-mini .seg.done { background: var(--color-secondary); }
+.progress-bar-mini .seg.active { background: var(--color-primary); }
+
+/* ===== Main / Week cards ===== */
+main { padding: 28px 0 80px; }
+
+.week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.week-card {
+  background: var(--surface-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 22px 22px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+@media (min-width: 768px) {
+  .week-card { padding: 26px 28px; grid-template-columns: 1fr auto; align-items: center; }
+}
+.week-card.locked { opacity: 0.55; }
+
+.week-card-body { min-width: 0; }
+.week-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.week-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-blue-soft);
+  color: var(--color-primary-dark);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+.week-card.locked .week-badge { background: var(--surface-subtle); color: var(--text-muted); }
+.week-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.week-status.submitted { background: var(--color-secondary-soft); color: var(--color-secondary-dark); }
+.week-status.draft { background: var(--surface-soft); color: var(--color-accent-dark); }
+.week-status.pending { background: var(--color-urgent-soft); color: var(--color-urgent); }
+.week-status.locked { background: var(--surface-subtle); color: var(--text-muted); }
+
+.week-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+  color: var(--text-primary);
+}
+.week-card.locked .week-title { color: var(--text-muted); }
+.week-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.week-meta .sep::before { content: '·'; padding-right: 6px; opacity: 0.4; }
+
+.week-preview {
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--surface-subtle);
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--color-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.week-preview-meta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.week-preview-meta .img-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 700;
+}
+
+.week-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .week-actions { width: 100%; }
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+.btn-ghost {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+}
+.btn-ghost:hover { background: var(--surface-base); color: var(--text-primary); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(59,130,246,.25);
+}
+.btn-primary:hover { box-shadow: 0 5px 14px rgba(59,130,246,.35); }
+.btn-success {
+  background: var(--surface-base);
+  color: var(--color-secondary-dark);
+  border: 1px solid var(--color-secondary);
+}
+.btn-success:hover { background: var(--color-secondary-soft); }
+.btn:disabled {
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-soft);
+  cursor: not-allowed;
+}
+@media (max-width: 767px) {
+  .week-actions .btn { flex: 1; }
+}
+
+/* ===== Help box ===== */
+.help-box {
+  margin-top: 28px;
+  background: var(--surface-soft);
+  border: 1px solid rgba(212, 160, 23, 0.20);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.help-box .em { font-size: 20px; flex-shrink: 0; }
+.help-box .text { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+.help-box .text b { color: var(--text-primary); font-weight: 800; }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand-row">
+      <a href="./" class="brand">재테크 라운지<span class="dot">.</span></a>
+      <span class="brand-sub">강의실</span>
+    </div>
+    <nav class="nav-links">
+      <a href="./">강의실</a>
+      <a href="./assignments.html" class="active">과제 게시판</a>
+      <a href="./training.html">트레이닝 현황표</a>
+      <span class="nav-user">
+        <span class="nick">…</span>
+        <a href="#" id="logout-btn">로그아웃</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">📝 과제 게시판</span>
+    <h1>내 과제</h1>
+    <p class="sub">주차별 과제를 여기서 작성하고 제출하세요. 임시 저장도 가능해요.</p>
+  </div>
+</section>
+
+<!-- ===== Stats ===== -->
+<section class="stats-section">
+  <div class="wrap">
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card completed">
+        <div class="stat-label">제출 완료</div>
+        <div class="stat-value"><span id="stat-submitted">0</span><small>/ 4</small></div>
+      </div>
+      <div class="stat-card percent">
+        <div class="stat-label">진행률</div>
+        <div class="stat-value"><span id="stat-pct">0</span><small>%</small></div>
+      </div>
+      <div class="stat-card next">
+        <div class="stat-label">다음 마감</div>
+        <div class="stat-value" id="stat-next">—</div>
+      </div>
+      <div class="stat-card streak">
+        <div class="stat-label">연속 제출</div>
+        <div class="stat-value"><span id="stat-streak">0</span>주</div>
+      </div>
+    </div>
+    <div class="progress-bar-mini" id="progress-mini">
+      <div class="seg"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+      <div class="seg"></div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="week-list" id="week-list">
+      <!-- 동적 생성 -->
+    </div>
+
+    <!-- ===== Help ===== -->
+    <div class="help-box">
+      <div class="em">💡</div>
+      <div class="text">
+        <b>제출 안내</b> · 작성 도중 페이지를 닫아도 자동으로 임시 저장돼요. 제출 후에도 마감일 전까지는 수정 가능합니다. <b>1주차 미제출 시 강퇴</b>되니 꼭 제출해주세요.
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// 주차 메타 (6/29 개강)
+const WEEKS = [
+  { n: 1, title: '🔹 내 자산 그릇 점검하기',                       unlock: '2026-06-29', due: '2026-07-05', template: '내집도은퇴도_1주차_과제양식.xlsx' },
+  { n: 2, title: '🔹 평생 흔들리지 않는 자산 구조 — 은퇴 체력 만들기', unlock: '2026-07-06', due: '2026-07-12', template: '내집도은퇴도_2주차_과제양식.xlsx' },
+  { n: 3, title: '🔹 내 집 마련 기초',                              unlock: '2026-07-13', due: '2026-07-19' },
+  { n: 4, title: '🔹 나만의 똘똘한 1채 찾기',                       unlock: '2026-07-20', due: '2026-07-26' },
+];
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const wk = ['일','월','화','수','목','금','토'][d.getDay()];
+  return `${m}/${day} (${wk})`;
+}
+function fmtDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return `${m}/${day} ${hh}:${mm}`;
+}
+function daysUntil(iso) {
+  if (!iso) return null;
+  const t = new Date(iso + 'T23:59:59').getTime();
+  return Math.ceil((t - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+function escapeHtml(s) {
+  return String(s || '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+function getWeekStatus(meta, assignment) {
+  const now = Date.now();
+  const unlockTs = new Date(meta.unlock + 'T00:00:00').getTime();
+  if (now < unlockTs) return 'locked';
+  if (assignment?.status === 'submitted') return 'submitted';
+  if (assignment?.status === 'draft') return 'draft';
+  return 'pending';
+}
+
+function renderWeekCard(meta, assignment, status) {
+  const due = fmtDate(meta.due);
+  const days = daysUntil(meta.due);
+  const dayLabel = days > 0 ? ` · ${days}일 남음` : days === 0 ? ' · 오늘 마감' : '';
+
+  let statusBadge = '';
+  let actions = '';
+  let preview = '';
+  let metaExtra = '';
+
+  // 양식 다운로드 버튼 (template 있고 잠금 해제 상태일 때만)
+  const tplBtn = (meta.template && status !== 'locked')
+    ? `<a class="btn btn-ghost btn-sm" href="./assignments/${encodeURIComponent(meta.template)}" download="${escapeHtml(meta.template)}" title="양식 다운로드">📥 양식</a>`
+    : '';
+
+  if (status === 'submitted') {
+    statusBadge = `<span class="week-status submitted">✓ 제출 완료</span>`;
+    const txt = assignment.proof_text?.slice(0, 90) || '(인증 글 없음)';
+    preview = `<div class="week-preview">${escapeHtml(txt)}${assignment.proof_text?.length > 90 ? '…' : ''}</div>`;
+    const imgs = assignment.assignment_images?.length || 0;
+    const netWorth = computeNetWorth(assignment.form_data);
+    metaExtra = `<div class="week-preview-meta">
+      <span class="img-count">📎 첨부 ${imgs}장</span>
+      ${netWorth != null ? `<span class="sep">순자산 ${netWorth.toLocaleString()}만원</span>` : ''}
+    </div>`;
+    actions = `${tplBtn}<a class="btn btn-success btn-sm" href="./submit.html?week=${meta.n}">수정</a>`;
+  } else if (status === 'draft') {
+    statusBadge = `<span class="week-status draft">📝 임시 저장</span>`;
+    const txt = assignment.proof_text?.slice(0, 90) || '(아직 작성 중)';
+    preview = `<div class="week-preview">${escapeHtml(txt)}${assignment.proof_text?.length > 90 ? '…' : ''}</div>`;
+    actions = `${tplBtn}<a class="btn btn-primary" href="./submit.html?week=${meta.n}">이어 작성</a>`;
+  } else if (status === 'pending') {
+    statusBadge = `<span class="week-status pending">⏰ 미작성</span>`;
+    actions = `${tplBtn}<a class="btn btn-primary" href="./submit.html?week=${meta.n}">작성하기</a>`;
+  } else {
+    // locked
+    statusBadge = `<span class="week-status locked">🔒 미공개</span>`;
+    actions = `<button class="btn btn-ghost" disabled>잠김</button>`;
+  }
+
+  const submittedAt = assignment?.submitted_at ? `<span class="sep">${fmtDateTime(assignment.submitted_at)} 제출</span>` : '';
+  const updatedAt = !submittedAt && assignment?.updated_at ? `<span class="sep">${fmtDateTime(assignment.updated_at)} 마지막 수정</span>` : '';
+
+  const lockedClass = status === 'locked' ? ' locked' : '';
+  const unlockHint = status === 'locked' ? `${fmtDate(meta.unlock)} 공개 예정 · ${due} 마감` : `${due} 마감${dayLabel}`;
+
+  return `
+    <article class="week-card${lockedClass}">
+      <div class="week-card-body">
+        <div class="week-card-top">
+          <span class="week-badge">WEEK ${String(meta.n).padStart(2,'0')}</span>
+          ${statusBadge}
+        </div>
+        <h3 class="week-title">${meta.title}</h3>
+        <div class="week-meta">
+          <span>${unlockHint}</span>
+          ${submittedAt}${updatedAt}
+        </div>
+        ${preview}
+        ${metaExtra}
+      </div>
+      <div class="week-actions">${actions}</div>
+    </article>
+  `;
+}
+
+function computeNetWorth(fd) {
+  if (!fd) return null;
+  const sum = (arr) => Array.isArray(arr) ? arr.reduce((a,b)=>a+(parseFloat(b)||0),0) : 0;
+  const asset = sum(fd.asset);
+  const debt = sum(fd.debt);
+  if (asset === 0 && debt === 0) return null;
+  return asset - debt;
+}
+
+function renderAll(assignments) {
+  // assignments: array of { week, status, form_data, proof_text, submitted_at, ... }
+  const byWeek = {};
+  for (const a of assignments || []) byWeek[a.week] = a;
+
+  // 카드
+  const html = WEEKS.map(meta => {
+    const a = byWeek[meta.n];
+    const status = getWeekStatus(meta, a);
+    return renderWeekCard(meta, a, status);
+  }).join('');
+  document.getElementById('week-list').innerHTML = html;
+
+  // 통계
+  let submitted = 0, streak = 0;
+  let nextDue = null;
+  let lastSubmitted = -1;
+  for (const meta of WEEKS) {
+    const a = byWeek[meta.n];
+    const status = getWeekStatus(meta, a);
+    if (status === 'submitted') {
+      submitted++;
+      lastSubmitted = meta.n;
+    } else if (status !== 'locked' && !nextDue) {
+      nextDue = meta;
+    }
+  }
+  // 연속 제출 — 1주차부터 연속으로 submitted인 개수
+  for (let i = 0; i < WEEKS.length; i++) {
+    const a = byWeek[WEEKS[i].n];
+    if (a?.status === 'submitted') streak++;
+    else break;
+  }
+  // 다음 마감이 없으면 다음 잠긴 주차
+  if (!nextDue) nextDue = WEEKS.find(m => Date.now() < new Date(m.unlock).getTime()) || null;
+
+  document.getElementById('stat-submitted').textContent = submitted;
+  document.getElementById('stat-pct').textContent = Math.round((submitted / 4) * 100);
+  document.getElementById('stat-next').textContent = nextDue ? fmtDate(nextDue.due) : '완료';
+  document.getElementById('stat-streak').textContent = streak;
+
+  // 진행 바
+  const segs = document.querySelectorAll('#progress-mini .seg');
+  WEEKS.forEach((meta, i) => {
+    const a = byWeek[meta.n];
+    const status = getWeekStatus(meta, a);
+    segs[i].className = 'seg';
+    if (status === 'submitted') segs[i].classList.add('done');
+    else if (status === 'draft' || status === 'pending') segs[i].classList.add('active');
+  });
+}
+
+async function load() {
+  try {
+    const r = await fetch('/api/assignments', { cache: 'no-store' });
+    if (!r.ok) {
+      renderAll([]);
+      return;
+    }
+    const { assignments } = await r.json();
+    renderAll(assignments || []);
+  } catch (e) {
+    console.error('load failed', e);
+    renderAll([]);
+  }
+}
+
+document.addEventListener('auth-ready', (e) => {
+  const user = e.detail || {};
+  const nick = document.querySelector('.nav-user .nick');
+  if (nick) nick.textContent = user.nickname || '수강생';
+  load();
+});
+
+document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  location.href = '/api/auth/logout';
+});
+</script>
+
+</body>
+</html>

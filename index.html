@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>재테크 라운지 강의실 3기 — 내 집도, 은퇴도</title>
+<meta name="description" content="재테크 라운지 3기 공식 강의실. 부동산 + 금융 통합 자산 설계 4주 챌린지. 6/29 개강, 부상구 × 금융쌤이 함께합니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="재테크 라운지 강의실 3기 — 내 집도, 은퇴도">
+<meta property="og:description" content="6/29 개강 · 4주 챌린지 공식 강의실. 부상구 × 금융쌤.">
+<meta property="og:locale" content="ko_KR">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- 인증 게이트 -->
+<style id="auth-gate-style">html { visibility: hidden; }</style>
+<script>
+(async function authGate() {
+  try {
+    const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+    if (!r.ok) throw new Error('unauth');
+    const user = await r.json();
+    if (user.banned) {
+      const q = user.reason ? '?reason=' + encodeURIComponent(user.reason) : '';
+      location.replace('/banned.html' + q);
+      return;
+    }
+    window.__user = user;
+    document.documentElement.style.visibility = 'visible';
+    var fireReady = function() { document.dispatchEvent(new CustomEvent('auth-ready', { detail: user })); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireReady);
+    } else {
+      fireReady();
+    }
+  } catch {
+    location.replace('/login.html?return=' + encodeURIComponent(location.pathname + location.search));
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #1E40AF;
+  --color-secondary: #7ED957;
+  --color-secondary-dark: #5A9E3F;
+  --color-accent: #FFD700;
+  --color-accent-dark: #D4A017;
+  --color-urgent: #EF4444;
+  --kakao: #FEE500;
+  --kakao-text: #191919;
+
+  --surface-base: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-soft: #FFF9F0;
+  --surface-green-soft: #F0FAE9;
+  --surface-blue-soft: #EFF6FF;
+  --surface-dark: #0D1B2A;
+  --surface-darker: #020817;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+  --text-dim-on-dark: #CBD5E1;
+  --text-faint-on-dark: #64748B;
+
+  --border-subtle: rgba(15,23,42,.08);
+  --shadow-sm: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-md: 0 8px 24px rgba(15,23,42,.10);
+  --shadow-lg: 0 20px 48px rgba(15,23,42,.14);
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s var(--ease);
+
+  --container-max: 880px;
+  --pad-x-mobile: 20px;
+  --pad-x-tablet: 32px;
+  --section-pad: clamp(56px, 8vw, 96px);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", sans-serif;
+  font-weight: 450;
+  font-size: clamp(15px, 1.8vw, 17px);
+  line-height: 1.7;
+  color: var(--text-primary);
+  background: var(--surface-base);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+img, svg { max-width: 100%; display: block; }
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 var(--pad-x-mobile);
+}
+@media (min-width: 768px) { .wrap { max-width: 720px; padding: 0 var(--pad-x-tablet); } }
+@media (min-width: 1024px) { .wrap { max-width: var(--container-max); } }
+
+section { padding: var(--section-pad) 0; position: relative; }
+.bg-dark { background: linear-gradient(180deg, #020817 0%, #0D1B2A 50%, #1B263B 100%); color: var(--text-inverse); }
+.bg-base { background: var(--surface-base); }
+.bg-subtle { background: var(--surface-subtle); }
+.bg-cream { background: var(--surface-soft); }
+
+.glow-blue, .glow-green {
+  position: absolute; border-radius: 50%; filter: blur(20px); pointer-events: none;
+}
+.glow-blue {
+  width: 380px; height: 380px; top: -80px; right: -100px;
+  background: radial-gradient(circle, rgba(59,130,246,0.35), transparent 60%);
+}
+.glow-green {
+  width: 320px; height: 320px; bottom: -80px; left: -80px;
+  background: radial-gradient(circle, rgba(126,217,87,0.18), transparent 60%);
+}
+
+h1, h2, h3 { font-weight: 900; letter-spacing: -.025em; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 48px); letter-spacing: -.03em; }
+h2 { font-size: clamp(24px, 4vw, 36px); }
+h3 { font-size: clamp(17px, 2.2vw, 21px); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; letter-spacing: -.005em;
+  color: var(--color-secondary-dark); background: var(--surface-green-soft);
+  padding: 7px 14px; border-radius: 999px; margin-bottom: 16px;
+}
+.bg-dark .eyebrow { color: #FCD34D; background: rgba(252,211,77,.12); }
+.eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); }
+
+.section-title { margin-bottom: 12px; }
+.section-sub {
+  font-size: clamp(15px, 1.7vw, 17px);
+  color: var(--text-secondary); line-height: 1.7;
+  margin: 0 0 32px; max-width: 60ch;
+}
+.bg-dark .section-sub { color: var(--text-dim-on-dark); }
+
+.grad-blue-purple {
+  background: linear-gradient(135deg, #60A5FA, #A78BFA);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+.grad-gold {
+  background: linear-gradient(135deg, #FCD34D, #F59E0B);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* ===== Header ===== */
+header.site {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid rgba(15,23,42,.06);
+}
+header.site .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.brand-row { display: flex; align-items: baseline; gap: 8px; }
+.brand { font-weight: 800; letter-spacing: -.02em; font-size: 17px; }
+.brand .dot { color: var(--color-secondary-dark); }
+.brand-sub {
+  font-size: 12px; color: var(--text-muted); font-weight: 500;
+  display: none;
+}
+@media (min-width: 768px) { .brand-sub { display: inline; } }
+.nav-links { display: flex; gap: 18px; align-items: center; }
+.nav-links a { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+.nav-links a:hover { color: var(--text-primary); }
+.nav-links a.active { color: var(--text-primary); font-weight: 800; }
+@media (max-width: 600px) { .nav-links a:not(.active) { display: none; } }
+
+/* ===== Hero ===== */
+.hero { position: relative; overflow: hidden; padding-top: clamp(56px, 8vw, 88px); padding-bottom: clamp(56px, 8vw, 88px); }
+.hero .wrap { position: relative; z-index: 1; text-align: center; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(126,217,87,.16);
+  border: 1px solid rgba(126,217,87,.32);
+  color: #BEE9A0;
+  padding: 7px 16px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; letter-spacing: -.005em;
+  margin-bottom: 20px;
+}
+.hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #7ED957; }
+.hero h1 { color: #fff; margin-bottom: 18px; }
+.hero h1 .row { display: block; }
+.hero-sub {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--text-dim-on-dark); line-height: 1.75;
+  margin: 0 0 32px;
+}
+.hero-meta {
+  display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px; letter-spacing: .04em;
+  color: var(--text-faint-on-dark);
+  border-top: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  padding: 14px 24px;
+}
+.hero-meta b { color: #fff; font-weight: 800; }
+
+/* ===== Quick Links ===== */
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 768px) { .quick-links { grid-template-columns: repeat(2, 1fr); } }
+.quick-link {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+  transition: var(--transition);
+  display: block;
+}
+.quick-link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-secondary);
+}
+.quick-link .icon {
+  font-size: 26px;
+  margin-bottom: 8px;
+  display: block;
+  line-height: 1;
+}
+.quick-link .label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -.01em;
+  margin-bottom: 2px;
+}
+.quick-link .desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ===== Training Highlight Card ===== */
+.training-card {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: linear-gradient(135deg, #F0FAE9 0%, #FFFCE5 100%);
+  border: 1px solid rgba(126, 217, 87, 0.32);
+  border-radius: 18px;
+  padding: 22px 24px;
+  margin-bottom: 14px;
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.18);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.training-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(126, 217, 87, 0.28);
+}
+.training-card::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(126, 217, 87, 0.24) 0%, transparent 70%);
+  pointer-events: none;
+}
+.training-card .left {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-right: 22px;
+  margin-right: 22px;
+  border-right: 1px dashed rgba(90, 158, 63, 0.28);
+}
+.training-card .badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #5A9E3F;
+  color: #fff;
+  font-size: 10px; font-weight: 900;
+  padding: 3px 9px; border-radius: 999px;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.training-card .stat-row {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+.training-card .stat-mini {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  min-width: 64px;
+}
+.training-card .stat-mini .ico { font-size: 18px; line-height: 1; margin-bottom: 2px; }
+.training-card .stat-mini .num {
+  font-size: 28px; font-weight: 900;
+  line-height: 1; letter-spacing: -0.02em;
+}
+.training-card .stat-mini.active .num { color: #5A9E3F; }
+.training-card .stat-mini.scheduled .num { color: #D97706; }
+.training-card .stat-mini .num small {
+  font-size: 12px; color: var(--text-secondary);
+  font-weight: 700; margin-left: 2px;
+}
+.training-card .stat-mini .lbl {
+  font-size: 10px; color: var(--text-secondary);
+  font-weight: 700; letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+.training-card .body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  position: relative; z-index: 1;
+}
+.training-card .ttl {
+  font-size: 18px; font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.training-card .ttl .fire { color: #F59E0B; }
+.training-card .sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+.training-card .sub b { color: #5A9E3F; font-weight: 800; }
+.training-card .arrow-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  font-size: 12px; font-weight: 800;
+  color: #5A9E3F;
+}
+.training-card .arrow-row .arrow {
+  transition: transform 0.2s ease;
+}
+.training-card:hover .arrow-row .arrow {
+  transform: translateX(4px);
+}
+@media (max-width: 600px) {
+  .training-card { flex-direction: column; padding: 20px; }
+  .training-card .left {
+    border-right: 0;
+    border-bottom: 1px dashed rgba(90, 158, 63, 0.28);
+    padding-right: 0; margin-right: 0;
+    padding-bottom: 14px; margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .training-card .stat-mini .num { font-size: 24px; }
+}
+
+/* ===== Week Cards ===== */
+.week-cards { display: grid; gap: 18px; }
+.week-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.week-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.week-card .top-bar { height: 5px; }
+.week-card.w1 .top-bar { background: linear-gradient(90deg, #7ED957, #3B82F6); }
+.week-card.w2 .top-bar { background: linear-gradient(90deg, #7ED957, #5A9E3F); }
+.week-card.w3 .top-bar { background: linear-gradient(90deg, #3B82F6, #1E40AF); }
+.week-card.w4 .top-bar { background: linear-gradient(90deg, #FCD34D, #F59E0B); }
+.week-card .body { padding: clamp(22px, 3vw, 32px); }
+.week-card .badge-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 14px;
+}
+.week-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface-subtle);
+  color: var(--text-primary);
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 11px; font-weight: 800; letter-spacing: .04em;
+}
+.week-badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+.week-card.w1 .week-badge .dot { background: linear-gradient(135deg, #7ED957, #3B82F6); }
+.week-card.w2 .week-badge .dot { background: #7ED957; }
+.week-card.w3 .week-badge .dot { background: #3B82F6; }
+.week-card.w4 .week-badge .dot { background: linear-gradient(135deg, #FCD34D, #F59E0B); }
+.week-card h3 {
+  font-size: clamp(18px, 2.3vw, 22px);
+  margin: 0 0 14px;
+  letter-spacing: -.02em; line-height: 1.35;
+}
+
+.week-block-label {
+  display: inline-block;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px;
+  margin: 18px 0 12px;
+}
+.week-block-label.lecture { background: var(--surface-blue-soft); color: var(--color-primary-dark); }
+.week-block-label.task { background: var(--surface-green-soft); color: var(--color-secondary-dark); }
+.week-card .week-block-label:first-of-type { margin-top: 4px; }
+.week-checks { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.week-checks li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: clamp(14px, 1.7vw, 16px);
+  color: var(--text-secondary); line-height: 1.55;
+}
+.week-checks li svg {
+  flex-shrink: 0; width: 16px; height: 16px;
+  color: var(--color-secondary-dark); margin-top: 4px;
+}
+
+/* VOD slot */
+.vod-slot {
+  background: #1a1a1a;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 16px 0 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px dashed rgba(255,255,255,.18);
+}
+.vod-slot .ph {
+  text-align: center; padding: 20px;
+  color: rgba(255,255,255,.65);
+}
+.vod-slot .ph .em { font-size: 36px; margin-bottom: 8px; opacity: .8; }
+.vod-slot .ph .ttl { font-weight: 800; font-size: 14px; margin-bottom: 4px; color: #fff; }
+.vod-slot .ph .desc { font-size: 12px; line-height: 1.5; }
+.vod-slot iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+.vod-link {
+  position: absolute; inset: 0;
+  display: block;
+  width: 100%; height: 100%;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+.vod-link img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s ease, filter .3s ease;
+  filter: brightness(.85);
+}
+.vod-link:hover img { transform: scale(1.03); filter: brightness(.7); }
+.vod-link .play-btn {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.75);
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  border: 2px solid rgba(255,255,255,.95);
+}
+.vod-link:hover .play-btn {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+.vod-link .play-btn svg { width: 28px; height: 28px; color: #fff; margin-left: 4px; }
+.vod-link:hover .play-btn svg { color: #0d2308; }
+.vod-link .vod-caption {
+  position: absolute; left: 16px; bottom: 14px; right: 16px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  text-shadow: 0 1px 6px rgba(0,0,0,.55);
+  letter-spacing: -.01em;
+}
+
+.action-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 14px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: -.005em;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-primary { background: var(--text-primary); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-accent { background: var(--color-secondary); color: #0d2308; }
+.btn-accent:hover { background: var(--color-secondary-dark); color: #fff; transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text-primary); border: 1.5px solid var(--text-primary); }
+.btn-ghost:hover { background: var(--text-primary); color: #fff; }
+
+/* ===== Resource Cards ===== */
+.resource-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) { .resource-grid { grid-template-columns: 1fr 1fr; } }
+.resource-card {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex; align-items: center; gap: 14px;
+  transition: var(--transition);
+}
+.resource-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.resource-icon {
+  flex-shrink: 0;
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  background: var(--surface-green-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.resource-meta { flex: 1; }
+.resource-meta .ttl {
+  font-size: 14px; font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -.01em; margin-bottom: 2px;
+}
+.resource-meta .desc {
+  font-size: 12px; color: var(--text-muted); line-height: 1.4;
+}
+.resource-card .arrow { color: var(--text-muted); font-size: 16px; }
+
+/* ===== How-it-works ===== */
+.flow-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 768px) { .flow-grid { grid-template-columns: repeat(4, 1fr); } }
+.flow-step {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 22px 20px;
+  position: relative;
+}
+.flow-step .num {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  color: var(--color-secondary-dark);
+  margin-bottom: 8px;
+}
+.flow-step h4 {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.015em;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+.flow-step p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ===== Info Cards (챌린지 안내) ===== */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) { .info-grid { grid-template-columns: repeat(3, 1fr); } }
+.info-card {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: clamp(24px, 3vw, 32px);
+  position: relative;
+  transition: var(--transition);
+  display: flex; flex-direction: column;
+}
+.info-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.info-card.featured {
+  background: linear-gradient(180deg, #FFF9F0 0%, #FEF3C7 100%);
+  border: 1.5px solid rgba(252,211,77,.45);
+}
+.info-card .badge-emoji {
+  font-size: 28px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.info-card h3 {
+  font-size: clamp(17px, 2.2vw, 20px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+.info-card .info-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0 0 16px;
+}
+.info-card .payback-amount {
+  font-size: clamp(28px, 4vw, 36px);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  color: var(--color-accent-dark);
+  line-height: 1;
+  margin: 6px 0 14px;
+}
+.info-card .payback-amount .unit {
+  font-size: .55em;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-left: 2px;
+}
+.info-card .payback-list {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; gap: 8px;
+}
+.info-card .payback-list li {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.info-card .payback-list .step-no {
+  font-weight: 800;
+  color: var(--color-accent-dark);
+  flex-shrink: 0;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+}
+.info-card .payback-list .step-amt {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.info-card .pill {
+  display: inline-block;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+.info-card .pill.core { background: rgba(239,68,68,.10); color: var(--color-urgent); }
+.info-card .pill.gift { background: rgba(126,217,87,.18); color: var(--color-secondary-dark); }
+
+/* ===== Single Help Card ===== */
+.help-card {
+  background: linear-gradient(135deg, #FFF9F0 0%, #F0FAE9 100%);
+  border: 1.5px solid rgba(126,217,87,.32);
+  border-radius: 18px;
+  padding: clamp(28px, 4vw, 40px);
+  text-align: center;
+}
+.help-card .icon-wrap {
+  width: 60px; height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--kakao);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 8px 20px rgba(254,229,0,.3);
+}
+.help-card h3 {
+  font-size: clamp(20px, 2.6vw, 24px);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0 0 10px;
+}
+.help-card p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0 0 22px;
+  max-width: 44ch;
+  margin-left: auto; margin-right: auto;
+}
+.help-card .btn {
+  font-size: 14px;
+  padding: 12px 22px;
+}
+.help-card .btn-kakao {
+  background: var(--kakao);
+  color: var(--kakao-text);
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(254,229,0,.3);
+}
+.help-card .btn-kakao:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+/* ===== Footer ===== */
+footer.site {
+  background: var(--surface-darker);
+  color: var(--text-faint-on-dark);
+  padding: 32px 0 40px;
+  text-align: center;
+}
+footer.site .brand { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+footer.site .copy { font-size: 12px; line-height: 1.65; color: var(--text-faint-on-dark); }
+
+/* ===== Reveal ===== */
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+@media (max-width: 480px) {
+  .hero-meta { gap: 14px; padding: 12px 16px; }
+}
+
+/* WEEK 카드 안내 박스 (긴급 라이브 등) */
+.week-notice {
+  margin-top: 14px;
+  padding: 14px 16px 15px;
+  background: linear-gradient(180deg, #FEF9C3 0%, #FEF3C7 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-left: 3px solid #F59E0B;
+  border-radius: 12px;
+}
+.week-notice .notice-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #92400E;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 3px 9px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+.week-notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #78350F;
+  word-break: keep-all;
+}
+.week-notice p b { color: #451A03; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site">
+  <div class="wrap">
+    <div class="brand-row">
+      <a href="https://busang-gu.github.io/jaetech-lounge/" class="brand">재테크 라운지<span class="dot">.</span></a>
+      <span class="brand-sub">내 집도, 은퇴도</span>
+    </div>
+    <nav class="nav-links">
+      <a href="https://busang-gu.github.io/jaetech-lounge/">소개</a>
+      <a href="./" class="active">강의실</a>
+      <a href="./assignments.html">과제 게시판</a>
+      <a href="./training.html">트레이닝 현황표</a>
+      <a href="/admin/index.html" id="nav-admin" style="display:none; color: var(--color-urgent);">관리자</a>
+      <span class="nav-user" id="nav-user" style="display:flex; align-items:center; gap:10px; font-size:13px; color: var(--text-muted); padding-left: 14px; margin-left: 4px; border-left: 1px solid #E2E8F0;">
+        <span id="user-nick"></span>
+        <a href="/api/auth/logout" style="font-size:11px; color: var(--text-muted); text-decoration: underline;">로그아웃</a>
+      </span>
+    </nav>
+  </div>
+</header>
+<script>
+document.addEventListener('auth-ready', function(e) {
+  const u = e.detail || {};
+  const nick = document.getElementById('user-nick');
+  if (nick) nick.textContent = (u.nickname || '수강생') + (u.isAdmin ? ' (관리자)' : '');
+  if (u.isAdmin) {
+    const a = document.getElementById('nav-admin');
+    if (a) a.style.display = '';
+  }
+
+  // 트레이닝 현황 — 진행 중 + 예정 인원 표시
+  fetch('/api/training', { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if (!d || !d.summary) return;
+      const active = d.summary.completed || 0;          // ⭕ 진행 중
+      const reserved = d.summary.scheduled || 0;        // 🔺 예정
+      const elA = document.getElementById('training-active');
+      const elS = document.getElementById('training-scheduled');
+      if (elA) elA.textContent = active;
+      if (elS) elS.textContent = reserved;
+
+      const total = active + reserved;
+      const subEl = document.querySelector('#training-card-link .sub');
+      if (subEl && total > 0) {
+        subEl.innerHTML = `강의 듣고 끝이 아니에요. 내 상황에 맞게 자산 구조를 같이 잡아주는 시간 — <b>이미 ${total}명이 받기 시작했어요.</b> 내 차례는?`;
+      } else if (subEl) {
+        subEl.innerHTML = `강의 듣고 끝이 아니에요. 내 상황에 맞게 자산 구조를 같이 잡아주는 시간 — <b>먼저 신청한 사람이 먼저 받아요.</b>`;
+      }
+    })
+    .catch(() => {});
+});
+</script>
+
+<!-- ===== Hero ===== -->
+<section class="hero bg-dark">
+  <div class="glow-blue"></div>
+  <div class="glow-green"></div>
+  <div class="wrap">
+    <div class="reveal">
+      <span class="hero-badge">
+        <span class="dot"></span>
+        재테크 라운지 공식 강의실
+      </span>
+      <h1>
+        <span class="row"><span class="grad-blue-purple">내 집도,</span> <span class="grad-gold">은퇴도.</span></span>
+      </h1>
+      <p class="hero-sub">
+        부동산 + 금융 통합 자산 설계 4주 챌린지.<br>
+        부상구 × 금융쌤이 함께 만든 강의실에 오신 걸 환영합니다.
+      </p>
+      <div class="hero-meta">
+        <span><b>4주</b> 완성 챌린지</span>
+        <span><b>부동산 × 금융</b> 통합</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Quick Links ===== -->
+<section class="bg-base" style="padding-top: clamp(36px, 5vw, 56px); padding-bottom: clamp(36px, 5vw, 56px);">
+  <div class="wrap">
+    <!-- 트레이닝 현황표 강조 카드 -->
+    <a class="training-card reveal" href="./training.html" id="training-card-link">
+      <div class="left">
+        <span class="badge">🎯 트레이닝</span>
+        <div class="stat-row">
+          <div class="stat-mini active">
+            <div class="ico">⭕</div>
+            <div class="num"><span id="training-active">—</span><small>명</small></div>
+            <div class="lbl">진행 중</div>
+          </div>
+          <div class="stat-mini scheduled">
+            <div class="ico">🔺</div>
+            <div class="num"><span id="training-scheduled">—</span><small>명</small></div>
+            <div class="lbl">예정</div>
+          </div>
+        </div>
+      </div>
+      <div class="body">
+        <h3 class="ttl"><span class="fire">🔥</span> 나도 트레이닝 받자!</h3>
+        <p class="sub">강의 듣고 끝이 아니에요. 내 상황에 맞게 자산 구조를 같이 잡아주는 시간 — <b>이미 친구들 받기 시작했어요.</b></p>
+        <div class="arrow-row">
+          현황표 보러 가기 <span class="arrow">→</span>
+        </div>
+      </div>
+    </a>
+
+    <div class="quick-links">
+      <a class="quick-link reveal" href="./assignments.html">
+        <span class="icon">📝</span>
+        <div class="label">과제 게시판</div>
+        <div class="desc">주차별 과제 안내 + 템플릿 다운로드</div>
+      </a>
+      <a class="quick-link reveal" href="#weeks">
+        <span class="icon">🎬</span>
+        <div class="label">강의실</div>
+        <div class="desc">주차별 VOD</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== How it works ===== -->
+<section class="bg-cream">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><span class="dot"></span>📌 이렇게 진행돼요</span>
+      <h2 class="section-title">4주 챌린지 운영 방식</h2>
+      <p class="section-sub">한 번 신청하시면 4주간 함께 가요.</p>
+    </div>
+    <div class="flow-grid">
+      <div class="flow-step reveal">
+        <div class="num">STEP 01</div>
+        <h4>주차별 강의 시청</h4>
+        <p>매주 월요일에 그 주차 강의가 열려요.</p>
+      </div>
+      <div class="flow-step reveal">
+        <div class="num">STEP 02</div>
+        <h4>과제 인증 (4회)</h4>
+        <p>주차별 과제를 게시판에 인증해 주세요.</p>
+      </div>
+      <div class="flow-step reveal">
+        <div class="num">STEP 03</div>
+        <h4>개별 트레이닝</h4>
+        <p>1:1로 자산 구조를 함께 잡아드려요.</p>
+      </div>
+      <div class="flow-step reveal">
+        <div class="num">STEP 04</div>
+        <h4>완주 + 페이백</h4>
+        <p>완주 후기까지 작성하면 페이백 받아요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Week Cards ===== -->
+<section id="weeks" class="bg-base">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><span class="dot"></span>📚 4주 커리큘럼</span>
+      <h2 class="section-title">주차별 강의</h2>
+      <p class="section-sub">각 주차의 강의 영상과 학습 주제입니다. 영상은 수강 중인 기수에게만 시청 권한이 부여됩니다.</p>
+    </div>
+
+    <div class="week-cards">
+
+      <!-- WEEK 01 -->
+      <article class="week-card w1 reveal">
+        <div class="top-bar"></div>
+        <div class="body">
+          <div class="badge-row">
+            <span class="week-badge"><span class="dot"></span>WEEK 01</span>
+          </div>
+          <h3>🔹 내 자산 그릇 점검하기</h3>
+
+          <span class="week-block-label lecture">강의 주제</span>
+          <ul class="week-checks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>내 돈이 지금 어디 있나 — 포트폴리오 진단</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>"내 돈이 일 안 하고 잠자고 있다"는 걸 마주하는 단계</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>자산·부채·소득·지출 한 장 정리법</li>
+          </ul>
+
+          <div class="vod-slot" data-week="1" data-yt="NY3yEM7iA1Y">
+            <button class="vod-link" type="button" aria-label="WEEK 01 강의 영상 재생">
+              <img src="https://i.ytimg.com/vi/NY3yEM7iA1Y/maxresdefault.jpg" alt="WEEK 01 — 내 자산 그릇 점검하기" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/NY3yEM7iA1Y/hqdefault.jpg'">
+              <span class="play-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="vod-caption">▶ 재생 · WEEK 01</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- WEEK 02 -->
+      <article class="week-card w2 reveal">
+        <div class="top-bar"></div>
+        <div class="body">
+          <div class="badge-row">
+            <span class="week-badge"><span class="dot"></span>WEEK 02</span>
+          </div>
+          <h3>🔹 평생 흔들리지 않는 자산 구조 — 은퇴 체력 만들기</h3>
+
+          <span class="week-block-label lecture">강의 주제</span>
+          <ul class="week-checks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>내 노후의 구멍을 메우고, 시드머니 보호 주머니 확보</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>연금 시뮬레이션 — 내 노후 구멍 확인 + 주머니 세팅</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>연금 3층 구조 (국민·퇴직·개인) 정리</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>ISA·연금저축·IRP 절세 활용법</li>
+          </ul>
+
+          <div class="vod-slot" data-week="2" data-yt="Me34jMduweI">
+            <button class="vod-link" type="button" aria-label="WEEK 02 강의 영상 재생">
+              <img src="https://i.ytimg.com/vi/Me34jMduweI/maxresdefault.jpg" alt="WEEK 02 — 평생 흔들리지 않는 자산 구조" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/Me34jMduweI/hqdefault.jpg'">
+              <span class="play-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="vod-caption">▶ 재생 · WEEK 02</span>
+            </button>
+          </div>
+
+          <div class="week-notice">
+            <div class="notice-tag">📢 추가 자료 안내</div>
+            <p>
+              2027년 기준 <b>AI 서버 사용량이 거의 2배</b>로 뜁니다. 공급 부족이 더 심해질 거예요.<br>
+              그래서 AI 인프라 관련 <b>증시 급락 대비 긴급 라이브 강의</b>를 미리 찍어왔어요.<br>
+              <b>2주차 과제까지 다 끝낸 분은 금융쌤님에게 개인톡으로 말씀주세요</b> — 같이 부자될 수 있게 바로 전달드릴게요 🔥
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- WEEK 03 -->
+      <article class="week-card w3 reveal">
+        <div class="top-bar"></div>
+        <div class="body">
+          <div class="badge-row">
+            <span class="week-badge"><span class="dot"></span>WEEK 03</span>
+          </div>
+          <h3>🔹 내 집 마련 기초</h3>
+
+          <span class="week-block-label lecture">강의 주제</span>
+          <ul class="week-checks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>집을 왜 사야하는지</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>집은 어떻게 사는지</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>어떤 집을 사야하는지</li>
+          </ul>
+
+          <div class="vod-slot" data-week="3" data-yt="5Qk0_SNobzo">
+            <button class="vod-link" type="button" aria-label="WEEK 03 강의 영상 재생">
+              <img src="https://i.ytimg.com/vi/5Qk0_SNobzo/maxresdefault.jpg" alt="WEEK 03 — 내 집 마련 기초" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/5Qk0_SNobzo/hqdefault.jpg'">
+              <span class="play-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="vod-caption">▶ 재생 · WEEK 03</span>
+            </button>
+          </div>
+
+          <div class="week-notice">
+            <div class="notice-tag">📢 작은 정정 한 줄</div>
+            <p>
+              영상 <b>34:34</b> 부근에서 일산 학원가를 "후곡·마곡"이라고 했는데, 정확히는 <b>후곡과 백마학원가</b>예요. 서울 마곡이랑 잠깐 헷갈렸어요 😅<br>
+              일산 임장 갈 분들은 <b>후곡 + 백마</b> 기준으로 봐주세요!
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- WEEK 04 -->
+      <article class="week-card w4 reveal">
+        <div class="top-bar"></div>
+        <div class="body">
+          <div class="badge-row">
+            <span class="week-badge"><span class="dot"></span>WEEK 04</span>
+          </div>
+          <h3>🔹 나만의 똘똘한 1채 찾기</h3>
+
+          <span class="week-block-label lecture">강의 주제</span>
+          <ul class="week-checks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>프롭테크로 나만의 단지 찾기</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>효율적인 임장 방법</li>
+          </ul>
+
+          <div class="vod-slot" data-week="4" data-yt="zNAr_KZRAFI">
+            <button class="vod-link" type="button" aria-label="WEEK 04 강의 영상 재생">
+              <img src="https://i.ytimg.com/vi/zNAr_KZRAFI/maxresdefault.jpg" alt="WEEK 04 — 나만의 똘똘한 1채 찾기" loading="lazy" onerror="this.src='https://i.ytimg.com/vi/zNAr_KZRAFI/hqdefault.jpg'">
+              <span class="play-btn" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+              <span class="vod-caption">▶ 재생 · WEEK 04</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== Challenge Info ===== -->
+<section id="info" class="bg-subtle">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><span class="dot"></span>📌 챌린지 안내</span>
+      <h2 class="section-title">완주하면 이런 게 있어요</h2>
+      <p class="section-sub">4주 챌린지를 운영하는 방식과 완주 시 받는 혜택을 정리했습니다.</p>
+    </div>
+
+    <div class="info-grid">
+
+      <article class="info-card featured reveal">
+        <div class="badge-emoji">🎁</div>
+        <h3>완주 페이백</h3>
+        <div class="payback-amount">30,000<span class="unit">원</span></div>
+        <p class="info-desc">4주 모두 완주하시면 페이백을 드려요. 항목별로 인증해 주세요.</p>
+        <ul class="payback-list">
+          <li><span class="step-no">①</span><span>주차별 과제 제출 (4회)</span><span class="step-amt">20,000원</span></li>
+          <li><span class="step-no">②</span><span>개별 트레이닝 참여</span><span class="step-amt">5,000원</span></li>
+          <li><span class="step-no">③</span><span>완주 후기 작성</span><span class="step-amt">5,000원</span></li>
+        </ul>
+      </article>
+
+      <article class="info-card reveal">
+        <div class="badge-emoji">🔥</div>
+        <span class="pill core">CORE</span>
+        <h3>개별 트레이닝</h3>
+        <p class="info-desc">챌린지에서 가장 중요한 시간이에요. 본인 상황에 맞게 자산 구조를 같이 잡아드립니다. 일정은 별도로 개별 안내드릴게요.</p>
+      </article>
+
+      <article class="info-card reveal">
+        <div class="badge-emoji">📚</div>
+        <span class="pill gift">LIMITED</span>
+        <h3>디지털 학습지</h3>
+        <p class="info-desc">챌린지 참여자께 드리는 한정 선물입니다. 개별 트레이닝 완료 순서대로 배포드려요.</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== Help ===== -->
+<section class="bg-base">
+  <div class="wrap">
+    <div class="reveal">
+      <span class="eyebrow"><span class="dot"></span>💬 도움 받기</span>
+      <h2 class="section-title">막힐 때는 단톡방에 질문해 주세요!</h2>
+    </div>
+
+    <div class="help-card reveal">
+      <div class="icon-wrap">💬</div>
+      <h3>챌린지 단톡방에서 같이 풀어요</h3>
+      <p>강의 내용·과제·일정 관련 모든 질문은 챌린지 단톡방에 남겨주세요. 부상구 × 금융쌤이 직접 답변드립니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer class="site">
+  <div class="wrap">
+    <div class="brand">재테크 라운지 · 부상구 × 금융쌤</div>
+    <div class="copy">© 2026 우리집 재테크 · 본 자료는 정보 제공 목적이며 투자 권유가 아닙니다.</div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// YouTube 인라인 재생 — 썸네일 클릭 시 같은 자리에서 iframe으로 교체
+document.querySelectorAll('.vod-slot[data-yt]').forEach(slot => {
+  const trigger = slot.querySelector('.vod-link');
+  if (!trigger) return;
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    const id = slot.dataset.yt;
+    if (!id) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&playsinline=1&modestbranding=1`;
+    iframe.title = trigger.getAttribute('aria-label') || '강의 영상';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    iframe.loading = 'lazy';
+    slot.innerHTML = '';
+    slot.appendChild(iframe);
+  });
+});
+</script>
+</body>
+</html>

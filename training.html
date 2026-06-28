@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>트레이닝 현황표 — 재테크 라운지 강의실</title>
+<meta name="description" content="재테크 라운지 3기 — 50명 수강생 트레이닝 진행 현황을 한눈에.">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- 인증 게이트 -->
+<style id="auth-gate-style">html { visibility: hidden; }</style>
+<script>
+(async function authGate() {
+  try {
+    const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+    if (!r.ok) throw new Error('unauth');
+    const user = await r.json();
+    if (user.banned) {
+      const q = user.reason ? '?reason=' + encodeURIComponent(user.reason) : '';
+      location.replace('/banned.html' + q);
+      return;
+    }
+    window.__user = user;
+    document.documentElement.style.visibility = 'visible';
+    const fireReady = function() { document.dispatchEvent(new CustomEvent('auth-ready', { detail: user })); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireReady);
+    } else {
+      fireReady();
+    }
+  } catch {
+    location.replace('/login.html?return=' + encodeURIComponent(location.pathname + location.search));
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #1E40AF;
+  --color-secondary: #7ED957;
+  --color-secondary-dark: #5A9E3F;
+  --color-secondary-soft: #DCFCE7;
+  --color-accent: #FFD700;
+  --color-accent-dark: #D4A017;
+  --color-urgent: #EF4444;
+  --color-urgent-soft: #FEF2F2;
+  --color-warn-soft: #FEF3C7;
+  --color-warn-deep: #92400E;
+
+  --surface-base: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-soft: #FFF9F0;
+  --surface-green-soft: #F0FAE9;
+  --surface-blue-soft: #EFF6FF;
+  --surface-dark: #0D1B2A;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  --border-soft: #E2E8F0;
+  --border-medium: #CBD5E1;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.06), 0 2px 6px rgba(15,23,42,.04);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-subtle);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+.wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+@media (min-width: 768px) { .wrap { padding: 0 32px; } }
+
+/* ===== Header ===== */
+.site-header {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(8px);
+}
+.site-header .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 14px; padding-bottom: 14px;
+}
+.brand-row { display: flex; align-items: baseline; gap: 10px; }
+.brand { font-size: 18px; font-weight: 900; letter-spacing: -0.02em; color: var(--text-primary); }
+.brand .dot { color: var(--color-secondary-dark); }
+.brand-sub { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.nav-links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.nav-links a { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+.nav-links a:hover { color: var(--text-primary); }
+.nav-links a.active { color: var(--text-primary); font-weight: 800; }
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted);
+  padding-left: 14px; margin-left: 4px;
+  border-left: 1px solid var(--border-soft);
+}
+.nav-user .nick { font-weight: 700; color: var(--text-secondary); }
+.nav-user a { text-decoration: underline; font-size: 11px; color: var(--text-muted); }
+@media (max-width: 640px) {
+  .nav-links a:not(.active) { display: none; }
+}
+
+/* ===== Hero ===== */
+.page-hero {
+  background: linear-gradient(135deg, var(--surface-blue-soft) 0%, var(--surface-green-soft) 100%);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 36px 0 32px;
+}
+.page-hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-base);
+  color: var(--color-primary-dark);
+  font-size: 12px; font-weight: 800;
+  padding: 4px 11px; border-radius: 999px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(59,130,246,0.2);
+}
+.page-hero h1 {
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -0.02em; line-height: 1.3;
+  margin: 0 0 6px;
+}
+@media (min-width: 768px) { .page-hero h1 { font-size: 32px; } }
+.page-hero .sub { font-size: 14px; color: var(--text-secondary); margin: 0; }
+
+/* ===== Stats ===== */
+.stats-section {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 20px 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+.stat-card { text-align: center; padding: 4px 8px; }
+.stat-label {
+  font-size: 11px; color: var(--text-muted);
+  font-weight: 700; letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.stat-value {
+  font-size: 22px; font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.stat-value small {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+.stat-card.done .stat-value { color: var(--color-secondary-dark); }
+.stat-card.done .stat-value::before { content: '⭕ '; font-size: 18px; }
+.stat-card.scheduled .stat-value { color: var(--color-warn-deep); }
+.stat-card.scheduled .stat-value::before { content: '🔺 '; font-size: 18px; }
+.stat-card.pending .stat-value { color: var(--color-urgent); }
+.stat-card.pending .stat-value::before { content: '❌ '; font-size: 18px; }
+
+/* ===== Filter bar ===== */
+main { padding: 28px 0 80px; }
+.filter-bar {
+  background: var(--surface-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+}
+.filter-bar .search {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+.filter-bar .search input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--surface-subtle);
+}
+.filter-bar .search input:focus {
+  outline: none; border-color: var(--color-primary); background: var(--surface-base);
+}
+.filter-bar .search::before {
+  content: '🔍';
+  position: absolute;
+  left: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  opacity: 0.5;
+}
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+  font-size: 12px; font-weight: 700;
+  padding: 7px 11px;
+  border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.chip:hover { color: var(--text-primary); background: var(--surface-base); }
+.chip.active {
+  background: var(--text-primary); color: #fff; border-color: var(--text-primary);
+}
+.chip .count {
+  background: rgba(255,255,255,0.25);
+  font-size: 10px; font-weight: 800;
+  padding: 1px 5px; border-radius: 999px;
+}
+.chip:not(.active) .count { background: var(--border-soft); color: var(--text-muted); }
+
+/* ===== Table ===== */
+.table-card {
+  background: var(--surface-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.table-scroll { overflow-x: auto; }
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 540px;
+}
+.students-table thead th {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 11px;
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.students-table thead th.center { text-align: center; }
+.students-table tbody tr { transition: background 0.12s; }
+.students-table tbody tr:hover { background: var(--surface-subtle); }
+.students-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+.students-table tbody tr:last-child td { border-bottom: none; }
+
+.student-name { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  flex-shrink: 0;
+}
+.avatar.s2 { background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%); }
+.avatar.s3 { background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%); color: #1A3D0E; }
+.avatar.s4 { background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%); }
+.avatar.s5 { background: linear-gradient(135deg, #F472B6 0%, #DB2777 100%); }
+.student-name .info { display: flex; flex-direction: column; }
+.student-name .nick { font-weight: 700; color: var(--text-primary); font-size: 13px; }
+.student-name .me { font-size: 10px; color: var(--color-secondary-dark); font-weight: 800; letter-spacing: 0.04em; }
+
+/* 상태 표시 (조회 전용) */
+.status-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  font-size: 18px; font-weight: 900;
+}
+.status-icon.completed { background: var(--color-secondary-soft); color: var(--color-secondary-dark); }
+.status-icon.scheduled { background: var(--color-warn-soft); color: var(--color-warn-deep); }
+.status-icon.pending   { background: var(--color-urgent-soft); color: var(--color-urgent); }
+
+/* 관리자 토글 (.is-admin일 때만 보임) */
+.status-toggle { display: none; gap: 6px; justify-content: center; }
+body.is-admin .status-toggle { display: inline-flex; }
+body.is-admin .status-icon { display: none; }
+.status-toggle button {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-base);
+  border-radius: 10px;
+  font-size: 18px; font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.status-toggle button:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.status-toggle button.completed.on { background: var(--color-secondary-soft); border-color: var(--color-secondary); color: var(--color-secondary-dark); }
+.status-toggle button.scheduled.on { background: var(--color-warn-soft); border-color: #F59E0B; color: var(--color-warn-deep); }
+.status-toggle button.pending.on   { background: var(--color-urgent-soft); border-color: var(--color-urgent); color: var(--color-urgent); }
+.status-toggle button.saving { opacity: 0.5; cursor: wait; }
+
+/* ===== Help ===== */
+.help-box {
+  margin-top: 24px;
+  background: var(--surface-soft);
+  border: 1px solid rgba(212, 160, 23, 0.20);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.help-box .em { font-size: 20px; flex-shrink: 0; }
+.help-box .text { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+.help-box .text b { color: var(--text-primary); font-weight: 800; }
+.help-box .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+.help-box .legend span { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; }
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="site-header">
+  <div class="wrap">
+    <div class="brand-row">
+      <a href="/" class="brand">재테크 라운지<span class="dot">.</span></a>
+      <span class="brand-sub">강의실</span>
+    </div>
+    <nav class="nav-links">
+      <a href="/">강의실</a>
+      <a href="/assignments.html">과제 게시판</a>
+      <a href="/training.html" class="active">트레이닝 현황표</a>
+      <a href="/admin/index.html" id="nav-admin" style="display:none; color: var(--color-urgent);">관리자</a>
+      <span class="nav-user">
+        <span class="nick" id="nav-nick">…</span>
+        <a href="/api/auth/logout" id="logout-btn">로그아웃</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Hero ===== -->
+<section class="page-hero">
+  <div class="wrap">
+    <span class="eyebrow">🎯 트레이닝</span>
+    <h1>트레이닝 현황표</h1>
+    <p class="sub">3기 50명 수강생의 1:1 트레이닝 진행 상태를 한눈에 확인하세요.</p>
+  </div>
+</section>
+
+<!-- ===== Stats ===== -->
+<section class="stats-section">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">전체</div>
+        <div class="stat-value"><span id="stat-total">0</span><small>명</small></div>
+      </div>
+      <div class="stat-card done">
+        <div class="stat-label">진행 중</div>
+        <div class="stat-value"><span id="stat-completed">0</span></div>
+      </div>
+      <div class="stat-card scheduled">
+        <div class="stat-label">예정</div>
+        <div class="stat-value"><span id="stat-scheduled">0</span></div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-label">미정</div>
+        <div class="stat-value"><span id="stat-pending">0</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="filter-bar">
+      <div class="search">
+        <input type="text" id="search-input" placeholder="닉네임 검색">
+      </div>
+      <div class="filter-chips" id="filter-chips">
+        <button class="chip active" data-filter="all">전체 <span class="count" id="cnt-all">0</span></button>
+        <button class="chip" data-filter="completed">⭕ 진행 중 <span class="count" id="cnt-completed">0</span></button>
+        <button class="chip" data-filter="scheduled">🔺 예정 <span class="count" id="cnt-scheduled">0</span></button>
+        <button class="chip" data-filter="pending">❌ 미정 <span class="count" id="cnt-pending">0</span></button>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>수강생</th>
+              <th class="center" style="width: 160px;">트레이닝</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody">
+            <tr><td colspan="2" class="empty-state">불러오는 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="help-box">
+      <div class="em">💡</div>
+      <div class="text">
+        <b>상태 안내</b>
+        <div class="legend">
+          <span>⭕ <b>진행 중</b> — 트레이닝 진행 중</span>
+          <span>🔺 <b>예정</b> — 일정 확정 / 진행 중</span>
+          <span>❌ <b>미정</b> — 아직 일정 안 잡힘</span>
+        </div>
+        <div style="margin-top:6px;">상태는 관리자가 직접 업데이트합니다. 내 상태가 다르면 단톡방에 알려주세요.</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let state = { students: [], summary: null, filter: 'all', search: '', user: null };
+
+function escapeHtml(s) {
+  return String(s || '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+function avatarClass(id) {
+  const variants = ['', 's2', 's3', 's4', 's5'];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return variants[hash % variants.length];
+}
+
+function renderStats(summary) {
+  document.getElementById('stat-total').textContent = summary.total;
+  document.getElementById('stat-completed').textContent = summary.completed;
+  document.getElementById('stat-scheduled').textContent = summary.scheduled;
+  document.getElementById('stat-pending').textContent = summary.pending;
+
+  document.getElementById('cnt-all').textContent = summary.total;
+  document.getElementById('cnt-completed').textContent = summary.completed;
+  document.getElementById('cnt-scheduled').textContent = summary.scheduled;
+  document.getElementById('cnt-pending').textContent = summary.pending;
+}
+
+function renderRow(s) {
+  const init = (s.nickname || '?').trim().charAt(0);
+  const ac = avatarClass(s.kakao_id || s.id);
+  const isMe = state.user && state.user.userId === s.id;
+
+  const status = s.training_status || 'pending';
+  const icons = { completed: '⭕', scheduled: '🔺', pending: '❌' };
+  const statusIcon = `<span class="status-icon ${status}">${icons[status]}</span>`;
+
+  const toggle = `
+    <div class="status-toggle" data-student-id="${escapeHtml(s.id)}">
+      <button type="button" class="pending ${status === 'pending' ? 'on' : ''}" data-status="pending" title="미정">❌</button>
+      <button type="button" class="scheduled ${status === 'scheduled' ? 'on' : ''}" data-status="scheduled" title="예정">🔺</button>
+      <button type="button" class="completed ${status === 'completed' ? 'on' : ''}" data-status="completed" title="진행 중">⭕</button>
+    </div>
+  `;
+
+  return `
+    <tr data-student-id="${escapeHtml(s.id)}">
+      <td>
+        <div class="student-name">
+          <span class="avatar ${ac}">${escapeHtml(init)}</span>
+          <div class="info">
+            <span class="nick">${escapeHtml(s.nickname)}${isMe ? ' <span class="me">· 나</span>' : ''}</span>
+          </div>
+        </div>
+      </td>
+      <td style="text-align:center;">${statusIcon}${toggle}</td>
+    </tr>
+  `;
+}
+
+function matchFilter(s) {
+  if (state.filter === 'all') return true;
+  return (s.training_status || 'pending') === state.filter;
+}
+function matchSearch(s) {
+  if (!state.search) return true;
+  const q = state.search.toLowerCase();
+  return (s.nickname || '').toLowerCase().includes(q);
+}
+
+function renderTable() {
+  const filtered = state.students.filter(s => matchFilter(s) && matchSearch(s));
+  const tbody = document.getElementById('students-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="2" class="empty-state">조건에 맞는 수강생이 없어요.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(renderRow).join('');
+}
+
+// 관리자 토글 핸들러
+document.getElementById('students-tbody').addEventListener('click', async (e) => {
+  const btn = e.target.closest('.status-toggle button');
+  if (!btn) return;
+  if (!state.user || !state.user.isAdmin) return;
+
+  const wrap = btn.parentElement;
+  const studentId = wrap.dataset.studentId;
+  const newStatus = btn.dataset.status;
+
+  // optimistic
+  wrap.querySelectorAll('button').forEach(b => {
+    b.classList.toggle('on', b.dataset.status === newStatus);
+    b.classList.add('saving');
+  });
+
+  try {
+    const res = await fetch('/api/admin/training', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, status: newStatus }),
+    });
+    if (!res.ok) throw new Error('save failed');
+    // state 업데이트
+    const s = state.students.find(x => x.id === studentId);
+    if (s) {
+      const before = s.training_status || 'pending';
+      s.training_status = newStatus;
+      // summary 재계산
+      if (before !== newStatus) {
+        state.summary[before] = Math.max(0, (state.summary[before] || 0) - 1);
+        state.summary[newStatus] = (state.summary[newStatus] || 0) + 1;
+        renderStats(state.summary);
+      }
+    }
+  } catch (err) {
+    alert('저장 실패: ' + err.message + ' — 새로고침 후 다시 시도해주세요.');
+  } finally {
+    wrap.querySelectorAll('button').forEach(b => b.classList.remove('saving'));
+  }
+});
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  state.search = e.target.value;
+  renderTable();
+});
+document.getElementById('filter-chips').addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('#filter-chips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  state.filter = btn.dataset.filter;
+  renderTable();
+});
+
+async function load() {
+  try {
+    const r = await fetch('/api/training', { cache: 'no-store' });
+    if (!r.ok) {
+      document.getElementById('students-tbody').innerHTML =
+        `<tr><td colspan="2" class="empty-state">데이터를 불러오지 못했어요.</td></tr>`;
+      return;
+    }
+    const { summary, students } = await r.json();
+    state.students = students || [];
+    state.summary = summary;
+    renderStats(summary);
+    renderTable();
+  } catch (e) {
+    console.error('training load failed', e);
+    document.getElementById('students-tbody').innerHTML =
+      `<tr><td colspan="2" class="empty-state">오류: ${e.message}</td></tr>`;
+  }
+}
+
+document.addEventListener('auth-ready', (e) => {
+  const user = e.detail || {};
+  state.user = user;
+  document.getElementById('nav-nick').textContent = (user.nickname || '수강생') + (user.isAdmin ? ' (관리자)' : '');
+  if (user.isAdmin) {
+    document.body.classList.add('is-admin');
+    const adminLink = document.getElementById('nav-admin');
+    if (adminLink) adminLink.style.display = '';
+  }
+  load();
+});
+</script>
+
+</body>
+</html>

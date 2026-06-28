@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>수강생 상세 · 재테크 라운지 3기 관리자</title>
+<meta name="description" content="수강생 상세 — 주차별 제출물 + 진도 현황 (관리자 전용).">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- 인증 게이트 — 관리자만 -->
+<style id="auth-gate-style">html { visibility: hidden; }</style>
+<script>
+(async function authGate() {
+  try {
+    const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+    if (!r.ok) throw new Error('unauth');
+    const user = await r.json();
+    if (user.banned) {
+      const q = user.reason ? '?reason=' + encodeURIComponent(user.reason) : '';
+      location.replace('/banned.html' + q);
+      return;
+    }
+    if (!user.isAdmin) {
+      location.replace('/');
+      return;
+    }
+    window.__user = user;
+    document.documentElement.style.visibility = 'visible';
+    var fireReady = function() { document.dispatchEvent(new CustomEvent('auth-ready', { detail: user })); };
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fireReady);
+    } else {
+      fireReady();
+    }
+  } catch {
+    location.replace('/login.html?return=' + encodeURIComponent(location.pathname + location.search));
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+:root {
+  --color-primary: #3B82F6;
+  --color-primary-dark: #1E40AF;
+  --color-primary-soft: #DBEAFE;
+  --color-secondary: #7ED957;
+  --color-secondary-dark: #5A9E3F;
+  --color-secondary-soft: #DCFCE7;
+  --color-accent: #FFD700;
+  --color-accent-dark: #D4A017;
+  --color-urgent: #EF4444;
+  --color-urgent-soft: #FEF2F2;
+  --color-info: #06B6D4;
+
+  --surface-base: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-soft: #FFF9F0;
+  --surface-green-soft: #F0FAE9;
+  --surface-blue-soft: #EFF6FF;
+  --surface-dark: #0D1B2A;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+
+  --border-subtle: rgba(15,23,42,.08);
+  --border-soft: #E2E8F0;
+  --border-medium: #CBD5E1;
+
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 2px 6px rgba(15,23,42,.04);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.06), 0 2px 6px rgba(15,23,42,.04);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-subtle);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+@media (min-width: 768px) { .wrap { padding: 0 32px; } }
+
+/* ===== Header ===== */
+.admin-header {
+  background: var(--surface-dark);
+  color: #fff;
+  border-bottom: 1px solid #1F2A40;
+  position: sticky; top: 0; z-index: 50;
+}
+.admin-header .wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 14px; padding-bottom: 14px;
+}
+.brand-row { display: flex; align-items: baseline; gap: 10px; }
+.admin-header .brand { font-size: 18px; font-weight: 900; letter-spacing: -0.02em; color: #fff; }
+.admin-header .brand .dot { color: var(--color-secondary); }
+.admin-header .brand-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; }
+.admin-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--color-urgent); color: #fff;
+  font-size: 10px; font-weight: 900;
+  padding: 3px 8px; border-radius: 4px;
+  letter-spacing: 0.06em;
+  margin-left: 6px;
+}
+.nav-links { display: flex; align-items: center; gap: 16px; }
+.nav-links a { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 600; }
+.nav-links a:hover { color: #fff; }
+.nav-links a.active { color: #fff; font-weight: 800; }
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: rgba(255,255,255,0.4);
+  padding-left: 14px; margin-left: 4px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+.nav-user .nick { font-weight: 700; color: rgba(255,255,255,0.85); }
+.nav-user a { text-decoration: underline; font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* ===== Breadcrumb ===== */
+.crumb {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 14px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.crumb a { color: var(--text-secondary); }
+.crumb a:hover { color: var(--text-primary); }
+.crumb-sep { opacity: 0.4; padding: 0 4px; }
+.crumb-current { color: var(--text-primary); font-weight: 700; }
+
+/* ===== Profile Header ===== */
+.profile-header {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 28px 0;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 768px) {
+  .profile-grid { grid-template-columns: auto 1fr auto; align-items: center; }
+}
+.profile-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900;
+}
+.profile-meta .nick-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.profile-meta .nick {
+  font-size: 24px; font-weight: 900; letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.profile-meta .status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 800;
+  padding: 4px 10px; border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.status-badge.on-track { background: var(--color-secondary-soft); color: var(--color-secondary-dark); }
+.status-badge.late { background: var(--color-urgent-soft); color: var(--color-urgent); }
+.status-badge.at-risk { background: var(--surface-soft); color: var(--color-accent-dark); }
+.profile-meta .kakao-id {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 12px; color: var(--text-muted);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.profile-meta .details {
+  margin-top: 8px;
+  display: flex; flex-wrap: wrap; gap: 14px;
+  font-size: 12px; color: var(--text-secondary);
+}
+.profile-meta .details .item { display: inline-flex; align-items: center; gap: 4px; }
+.profile-meta .details .item b { color: var(--text-primary); font-weight: 700; }
+.profile-actions {
+  display: flex; gap: 8px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  border: none; white-space: nowrap;
+  transition: transform 0.12s, background 0.12s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-ghost {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-soft);
+}
+.btn-ghost:hover { background: var(--surface-base); color: var(--text-primary); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: #fff;
+}
+.btn-danger {
+  background: var(--surface-base);
+  color: var(--color-urgent);
+  border: 1px solid var(--color-urgent);
+}
+.btn-danger:hover { background: var(--color-urgent-soft); }
+.btn:disabled { opacity: 0.5; pointer-events: none; }
+
+/* ===== 강퇴 배지 + 알림 박스 ===== */
+.banned-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; background: #FEF2F2; color: #B91C1C;
+  border: 1px solid #FCA5A5; border-radius: 999px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.02em;
+  margin-left: 8px;
+}
+.banned-banner {
+  background: linear-gradient(180deg, #FEF2F2 0%, #FECACA 100%);
+  border: 1.5px solid #F87171; border-radius: 12px;
+  padding: 14px 18px; margin: 12px 0 0;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.banned-banner .icn { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.banned-banner .body { flex: 1; font-size: 13px; line-height: 1.6; color: #7F1D1D; }
+.banned-banner .body b { font-weight: 800; }
+.banned-banner .body .reason {
+  margin-top: 6px; padding: 8px 12px; background: rgba(255,255,255,0.7);
+  border-radius: 8px; font-size: 12.5px; color: #991B1B;
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* ===== 강퇴 모달 ===== */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+.modal-card {
+  width: 100%; max-width: 440px;
+  background: var(--surface-base); border-radius: 16px;
+  padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+.modal-card h3 {
+  margin: 0 0 8px; font-size: 18px; font-weight: 800;
+  color: var(--color-urgent);
+}
+.modal-card .modal-desc {
+  font-size: 13px; line-height: 1.6; color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+.modal-card label {
+  display: block; font-size: 12px; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 6px;
+}
+.modal-card textarea {
+  width: 100%; min-height: 80px; padding: 10px 12px;
+  border: 1.5px solid var(--border-soft); border-radius: 10px;
+  font-family: inherit; font-size: 13.5px; line-height: 1.5;
+  color: var(--text-primary); resize: vertical;
+  box-sizing: border-box;
+}
+.modal-card textarea:focus { outline: none; border-color: var(--color-urgent); }
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  margin-top: 18px;
+}
+
+/* ===== Quick Stats ===== */
+.quick-stats {
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 18px 0;
+}
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 768px) { .quick-grid { grid-template-columns: repeat(4, 1fr); } }
+.quick-card {
+  display: flex; align-items: center; gap: 12px;
+}
+.quick-card .icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.quick-card.success .icon { background: var(--color-secondary-soft); }
+.quick-card.warn .icon { background: var(--color-urgent-soft); }
+.quick-card.info .icon { background: var(--surface-blue-soft); }
+.quick-card.accent .icon { background: var(--surface-soft); }
+.quick-card .label {
+  font-size: 11px; color: var(--text-muted);
+  font-weight: 700; letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.quick-card .value {
+  font-size: 17px; font-weight: 800;
+  color: var(--text-primary);
+}
+.quick-card .value small { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-left: 2px; }
+
+/* ===== Main ===== */
+main { padding: 28px 0 80px; }
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.tabs button {
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.tabs button:hover { color: var(--text-primary); }
+.tabs button.active {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary);
+}
+.tabs button .count {
+  margin-left: 4px;
+  background: var(--surface-subtle);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: var(--text-muted);
+}
+
+/* ===== Week Submission Card ===== */
+.submission-card {
+  background: var(--surface-base);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  margin-bottom: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.submission-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.submission-card.locked { opacity: 0.55; }
+.submission-card.locked .submission-head { border-bottom: none; }
+.submission-head-left {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.week-tag {
+  font-size: 11px; font-weight: 800;
+  background: var(--surface-blue-soft);
+  color: var(--color-primary-dark);
+  padding: 4px 10px; border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+.week-title {
+  font-size: 16px; font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+.submitted-time {
+  font-size: 11px; color: var(--text-muted);
+  font-weight: 600;
+}
+.week-status {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 800;
+  padding: 4px 10px; border-radius: 999px;
+}
+.week-status.submitted { background: var(--color-secondary-soft); color: var(--color-secondary-dark); }
+.week-status.draft { background: var(--surface-soft); color: var(--color-accent-dark); }
+.week-status.pending { background: var(--color-urgent-soft); color: var(--color-urgent); }
+.week-status.locked { background: var(--surface-subtle); color: var(--text-muted); }
+
+.submission-body {
+  padding: 22px;
+}
+
+/* ===== 자산 현황표 visualization ===== */
+.assets-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+@media (min-width: 768px) {
+  .assets-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.assets-box {
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 16px 18px;
+  background: var(--surface-base);
+}
+.assets-box .group-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+.assets-box.asset .group-label { color: var(--color-secondary-dark); }
+.assets-box.debt .group-label { color: var(--color-urgent); }
+.assets-box.income .group-label { color: var(--color-primary-dark); }
+.assets-box.expense .group-label { color: var(--color-accent-dark); }
+
+.assets-box dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 6px;
+  column-gap: 12px;
+  font-size: 13px;
+}
+.assets-box dt {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.assets-box dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.assets-box dd .unit {
+  font-size: 11px; color: var(--text-muted); font-weight: 600;
+  margin-left: 2px;
+}
+.assets-box .sum {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-soft);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.assets-box .sum .label {
+  font-size: 12px; font-weight: 800;
+  color: var(--text-secondary);
+}
+.assets-box .sum .value {
+  font-size: 16px; font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.assets-box.asset .sum .value { color: var(--color-secondary-dark); }
+.assets-box.debt .sum .value { color: var(--color-urgent); }
+.assets-box.income .sum .value { color: var(--color-primary-dark); }
+.assets-box.expense .sum .value { color: var(--color-accent-dark); }
+
+.net-worth-callout {
+  background: linear-gradient(135deg, var(--surface-dark) 0%, #1B263B 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 18px;
+}
+.net-worth-callout .label {
+  font-size: 13px; font-weight: 700;
+  color: rgba(255,255,255,0.7);
+}
+.net-worth-callout .value {
+  font-size: 22px; font-weight: 900;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+.net-worth-callout .value small {
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  font-weight: 600; margin-left: 4px;
+}
+.net-worth-callout .calc {
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  font-weight: 600;
+}
+
+/* ===== Roadmap ===== */
+.subsection-title {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 800;
+  color: var(--text-primary);
+  margin: 18px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.roadmap-table {
+  width: 100%;
+  border-collapse: separate; border-spacing: 0;
+  font-size: 12px;
+}
+.roadmap-table thead th {
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 11px;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.roadmap-table tbody td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.roadmap-table tbody td.time {
+  font-weight: 700; color: var(--text-primary);
+  white-space: nowrap;
+}
+.roadmap-table tbody td.age { font-weight: 700; color: var(--text-secondary); }
+.roadmap-table tbody td.empty { color: var(--text-muted); font-style: italic; }
+
+/* ===== Proof ===== */
+.proof-text {
+  background: var(--surface-subtle);
+  border-left: 3px solid var(--color-secondary);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+.proof-gallery {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+.proof-img {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+}
+.proof-file {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FAFCF7 0%, #F0FAE9 100%);
+  border: 1px solid rgba(126, 217, 87, 0.32);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 14px 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.proof-file:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.proof-file .file-icon { font-size: 30px; margin-bottom: 6px; }
+.proof-file .file-name {
+  font-size: 11px; font-weight: 700; text-align: center;
+  word-break: break-all; line-height: 1.4;
+  max-height: 4em; overflow: hidden;
+  color: var(--text-secondary);
+}
+.proof-file .file-hint {
+  font-size: 10px; color: var(--color-secondary-dark);
+  font-weight: 700; margin-top: 4px;
+}
+
+/* ===== Empty / Locked states ===== */
+.empty-state {
+  padding: 32px 22px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.empty-state .em { font-size: 28px; opacity: 0.5; margin-bottom: 8px; }
+.empty-state .text { font-size: 13px; font-weight: 600; }
+
+/* ===== Admin note ===== */
+.admin-note-card {
+  background: var(--surface-soft);
+  border: 1px solid rgba(212, 160, 23, 0.20);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-top: 18px;
+}
+.admin-note-card .head {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 800;
+  color: var(--color-accent-dark);
+  margin-bottom: 8px;
+}
+.admin-note-card textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface-base);
+  resize: vertical;
+}
+.admin-note-card textarea:focus {
+  outline: none; border-color: var(--color-accent);
+}
+.admin-note-card .note-actions {
+  margin-top: 8px; display: flex; gap: 6px; justify-content: flex-end;
+}
+.btn-tiny {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== Activity timeline (좌측 시점 표시) ===== */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+  margin-top: 12px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: var(--border-soft);
+}
+.timeline-item {
+  position: relative;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -22px; top: 9px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--surface-base);
+  border: 2px solid var(--color-primary);
+}
+.timeline-item.success::before { border-color: var(--color-secondary); }
+.timeline-item.warn::before { border-color: var(--color-urgent); }
+.timeline-item .time {
+  font-size: 11px; color: var(--text-muted); font-weight: 700;
+}
+.timeline-item .desc { font-weight: 500; }
+.timeline-item b { color: var(--text-primary); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<header class="admin-header">
+  <div class="wrap">
+    <div class="brand-row">
+      <a href="../" class="brand">재테크 라운지<span class="dot">.</span></a>
+      <span class="brand-sub">강의실</span>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="nav-links">
+      <a href="/admin/index.html">대시보드</a>
+      <a href="/training.html">트레이닝 현황표</a>
+      <a href="/">강의실 보기</a>
+      <span class="nav-user">
+        <span class="nick">…</span>
+        <a href="#" id="logout-btn">로그아웃</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== Breadcrumb ===== -->
+<nav class="crumb">
+  <div class="wrap">
+    <a href="./">대시보드</a>
+    <span class="crumb-sep">›</span>
+    <a href="./">수강생 명단</a>
+    <span class="crumb-sep">›</span>
+    <span class="crumb-current" id="crumb-name">불러오는 중…</span>
+  </div>
+</nav>
+
+<!-- ===== Profile ===== -->
+<section class="profile-header">
+  <div class="wrap">
+    <div class="profile-grid">
+      <div class="profile-avatar" id="profile-avatar">·</div>
+      <div class="profile-meta">
+        <div class="nick-row">
+          <span class="nick" id="profile-nick">불러오는 중…</span>
+          <span id="profile-status"></span>
+        </div>
+        <div class="kakao-id" id="profile-kakao">—</div>
+        <div class="details" id="profile-details">—</div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-danger" id="btn-expel" style="display:none;">🚫 강퇴하기</button>
+        <button class="btn" id="btn-unban" style="display:none; background:#475569; color:#fff;">↩ 강퇴 해제</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Quick Stats ===== -->
+<section class="quick-stats">
+  <div class="wrap">
+    <div class="quick-grid">
+      <div class="quick-card success">
+        <div class="icon">✅</div>
+        <div>
+          <div class="label">제출 완료</div>
+          <div class="value"><span id="qs-submitted">0</span><small>/ 4 주차</small></div>
+        </div>
+      </div>
+      <div class="quick-card info">
+        <div class="icon">📊</div>
+        <div>
+          <div class="label">현재 순자산</div>
+          <div class="value" id="qs-networth">—</div>
+        </div>
+      </div>
+      <div class="quick-card accent">
+        <div class="icon">📎</div>
+        <div>
+          <div class="label">첨부 이미지</div>
+          <div class="value"><span id="qs-images">0</span><small>장</small></div>
+        </div>
+      </div>
+      <div class="quick-card warn">
+        <div class="icon">⏰</div>
+        <div>
+          <div class="label">다음 마감</div>
+          <div class="value" style="font-size: 14px;" id="qs-next-due">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="active">제출물 <span class="count" id="tab-submissions-count">0</span></button>
+      <button>관리자 메모 <span class="count" id="tab-notes-count">0</span></button>
+    </div>
+    <div id="submissions-area">
+      <div style="text-align:center; padding:60px 20px; color: var(--text-muted); font-size: 13px;">불러오는 중…</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const WEEKS = [
+  { n: 1, title: '🔹 내 자산 그릇 점검하기',                       unlock: '2026-06-29', due: '2026-07-05' },
+  { n: 2, title: '🔹 평생 흔들리지 않는 자산 구조 — 은퇴 체력 만들기', unlock: '2026-07-06', due: '2026-07-12' },
+  { n: 3, title: '🔹 내 집 마련 기초',                              unlock: '2026-07-13', due: '2026-07-19' },
+  { n: 4, title: '🔹 나만의 똘똘한 1채 찾기',                       unlock: '2026-07-20', due: '2026-07-26' },
+];
+
+const ASSET_LABELS = ['예금 / 적금', '주식 / ETF', '연금 (퇴직·개인)', '부동산 (현재 시세)', '기타 자산'];
+const DEBT_LABELS = ['주택담보대출', '신용대출 / 카드론', '기타 부채'];
+const INCOME_LABELS = ['월 세후 급여', '기타 정기 수입'];
+const EXPENSE_LABELS = ['고정 지출', '변동 지출', '저축 / 투자'];
+
+const params = new URLSearchParams(location.search);
+const studentId = params.get('id');
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtDateShort(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const wk = ['일','월','화','수','목','금','토'][d.getDay()];
+  return `${d.getMonth()+1}/${d.getDate()} (${wk})`;
+}
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function relativeTime(iso) {
+  if (!iso) return '미접속';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '방금 전';
+  if (mins < 60) return mins + '분 전';
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + '시간 전';
+  return Math.floor(hours / 24) + '일 전';
+}
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+function num(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; }
+function sumArr(arr) { return Array.isArray(arr) ? arr.reduce((a,b) => a + num(b), 0) : 0; }
+
+function computeStatus(byWeek) {
+  const sub = [1,2,3,4].filter(n => byWeek[n]?.status === 'submitted').length;
+  if (sub === 4) return { key: 'completed', label: '🎉 완주', cls: 'completed' };
+  const w1 = byWeek[1];
+  if (!w1 || w1.status !== 'submitted') return { key: 'late', label: '⚠ 강퇴 후보', cls: 'late' };
+  const w2 = byWeek[2];
+  if (w2 && w2.status !== 'submitted') return { key: 'at-risk', label: '⏰ 늦어짐', cls: 'at-risk' };
+  return { key: 'on-track', label: '✓ 정상', cls: 'on-track' };
+}
+
+let currentStudent = null;
+
+function renderProfile(student, byWeek) {
+  currentStudent = student;
+  const init = (student.nickname || '?').trim().charAt(0);
+  document.getElementById('profile-avatar').textContent = init;
+  const nickEl = document.getElementById('profile-nick');
+  nickEl.textContent = student.nickname;
+  const oldPill = document.getElementById('banned-pill');
+  if (oldPill) oldPill.remove();
+  if (student.is_banned) {
+    nickEl.insertAdjacentHTML('afterend',
+      '<span class="banned-pill" id="banned-pill">🚫 강퇴됨</span>');
+  }
+  document.getElementById('profile-kakao').textContent = `kakao_${student.kakao_id}`;
+  document.getElementById('crumb-name').textContent = student.nickname;
+  document.title = `${student.nickname} — 수강생 상세 · 재테크 라운지 관리자`;
+
+  const status = computeStatus(byWeek);
+  document.getElementById('profile-status').outerHTML =
+    `<span id="profile-status" class="status-badge ${status.cls}">${status.label}</span>`;
+
+  const submitted = [1,2,3,4].filter(n => byWeek[n]?.status === 'submitted').length;
+  document.getElementById('profile-details').innerHTML = `
+    <span class="item">가입일 · <b>${fmtDate(student.created_at)}</b></span>
+    <span class="item">마지막 로그인 · <b>${relativeTime(student.last_login_at)}</b></span>
+    <span class="item">총 제출 · <b>${submitted}건</b></span>
+    <span class="item">결제 · <b>3만원 (완주 시 환급 예정)</b></span>
+  `;
+
+  // 강퇴/복구 버튼 토글
+  const btnExpel = document.getElementById('btn-expel');
+  const btnUnban = document.getElementById('btn-unban');
+  if (student.is_banned) {
+    btnExpel.style.display = 'none';
+    btnUnban.style.display = '';
+  } else {
+    btnExpel.style.display = '';
+    btnUnban.style.display = 'none';
+  }
+
+  // 강퇴된 학생이면 프로필 헤더에 빨간 배너
+  const oldBanner = document.getElementById('banned-banner');
+  if (oldBanner) oldBanner.remove();
+  if (student.is_banned) {
+    const banner = `
+      <div class="banned-banner" id="banned-banner">
+        <div class="icn">🚫</div>
+        <div class="body">
+          <b>이 수강생은 강퇴 처리된 상태예요.</b> 다음 로그인 시 차단되고, 강의실/과제 접근이 막혀요.
+          ${student.banned_at ? ` · ${fmtDateTime(student.banned_at)} 처리됨` : ''}
+          ${student.banned_reason ? `<div class="reason">${escapeHtml(student.banned_reason)}</div>` : ''}
+        </div>
+      </div>`;
+    document.querySelector('.profile-header .wrap').insertAdjacentHTML('beforeend', banner);
+  }
+}
+
+function renderQuickStats(byWeek) {
+  const submitted = [1,2,3,4].filter(n => byWeek[n]?.status === 'submitted').length;
+  document.getElementById('qs-submitted').textContent = submitted;
+
+  const fd = byWeek[1]?.form_data || {};
+  const nw = sumArr(fd.asset) - sumArr(fd.debt);
+  const nwEl = document.getElementById('qs-networth');
+  if (sumArr(fd.asset) === 0 && sumArr(fd.debt) === 0) nwEl.innerHTML = '—';
+  else nwEl.innerHTML = `${nw.toLocaleString()}<small>만원</small>`;
+
+  const imgs = [1,2,3,4].reduce((a, n) => a + (byWeek[n]?.assignment_images?.length || 0), 0);
+  document.getElementById('qs-images').textContent = imgs;
+
+  const next = WEEKS.find(m => Date.now() < new Date(m.due + 'T23:59:59').getTime());
+  document.getElementById('qs-next-due').textContent = next ? fmtDateShort(next.due) : '챌린지 종료';
+}
+
+function renderAssetTable(fd) {
+  const buildBox = (cls, label, items, sum) => `
+    <div class="assets-box ${cls}">
+      <div class="group-label">${label}</div>
+      <dl>${items.map(([lbl, v]) => `<dt>${lbl}</dt><dd>${num(v).toLocaleString()}<span class="unit">만원</span></dd>`).join('')}</dl>
+      <div class="sum">
+        <span class="label">${cls === 'asset' ? '자산' : cls === 'debt' ? '부채' : cls === 'income' ? '월 소득' : '월 지출'} 합계</span>
+        <span class="value">${sum.toLocaleString()}<small style="font-size:11px;color:var(--text-muted);font-weight:600;"> 만원</small></span>
+      </div>
+    </div>`;
+  const asset = fd.asset || [], debt = fd.debt || [], income = fd.income || [], expense = fd.expense || [];
+  const sA = sumArr(asset), sD = sumArr(debt), sI = sumArr(income), sE = sumArr(expense);
+  if (!sA && !sD && !sI && !sE) return '';
+  return `
+    <h4 class="subsection-title">📊 자산 현황표</h4>
+    <div class="assets-grid">
+      ${buildBox('asset', '💰 자산', ASSET_LABELS.map((l, i) => [l, asset[i]]), sA)}
+      ${buildBox('debt', '💳 부채', DEBT_LABELS.map((l, i) => [l, debt[i]]), sD)}
+      ${buildBox('income', '💵 월 소득', INCOME_LABELS.map((l, i) => [l, income[i]]), sI)}
+      ${buildBox('expense', '📉 월 지출', EXPENSE_LABELS.map((l, i) => [l, expense[i]]), sE)}
+    </div>
+    <div class="net-worth-callout">
+      <div><div class="label">순자산</div><div class="calc">자산 ${sA.toLocaleString()} − 부채 ${sD.toLocaleString()}</div></div>
+      <div class="value">${(sA-sD).toLocaleString()}<small>만원</small></div>
+    </div>`;
+}
+
+function renderRoadmap(fd) {
+  const rows = fd.roadmap || [];
+  if (!rows.length) return '';
+  return `
+    <h4 class="subsection-title">🗺 통합 로드맵 초안</h4>
+    <table class="roadmap-table">
+      <thead><tr><th>시점</th><th>나이</th><th>자산 목표</th><th>내 집 마련</th><th>은퇴 / 기타</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr>
+            <td class="time">${escapeHtml(r.time)}</td>
+            <td class="age">${escapeHtml(r.age || '—')}</td>
+            <td${r.asset_goal ? '' : ' class="empty"'}>${escapeHtml(r.asset_goal || '—')}</td>
+            <td${r.home_goal ? '' : ' class="empty"'}>${escapeHtml(r.home_goal || '—')}</td>
+            <td${r.retire_goal ? '' : ' class="empty"'}>${escapeHtml(r.retire_goal || '—')}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+const WEEK3_TERMS = {
+  term1: '호가 vs 실거래가', term2: '전용면적 vs 공급면적', term3: '용적률·건폐율',
+  term4: '취득세', term5: '재산세 6월 1일 룰', term6: '양도세',
+  term7: 'LTV', term8: 'DSR · DTI', term9: '원리금균등 vs 원금균등',
+  term10: '부대비용 5종', term11: '9억 기준 부대비용 ≈ 3,600만원',
+  term12: '토지 vs 건물', term13: '5대 핵심 업무지구', term14: '주요 노선', term15: '전세 = 매매 지지선',
+};
+
+function renderWeek3(fd) {
+  const r = fd.reasons || {};
+  const c = fd.conditions || {};
+  const checks = fd.checks || {};
+  const hasReasons = r.r1 || r.r2 || r.r3 || r.favoriteLine;
+  const hasChecks = Object.keys(checks).length > 0;
+  const hasConditions = c.budgetOwn || c.budgetLoan || c.region || (c.lines && c.lines.length) || c.size || c.age || c.school || c.movein;
+  if (!hasReasons && !hasChecks && !hasConditions) return '';
+
+  let html = '';
+
+  if (hasReasons) {
+    const list = [r.r1, r.r2, r.r3].filter(Boolean);
+    html += `<h4 class="subsection-title">🏠 내가 집을 사야 하는 이유</h4>
+      <ol style="margin:0 0 14px; padding-left:22px; line-height:1.7; color:#1a3d0e;">
+        ${list.map(t => `<li style="margin-bottom:6px;">${escapeHtml(t)}</li>`).join('')}
+      </ol>
+      ${r.favoriteLine ? `<div style="background:#f0fae9; border-left:3px solid #7ED957; padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:13.5px; color:#1a3d0e;"><b style="color:#5A9E3F;">💡 마음에 박힌 한 줄</b><br>${escapeHtml(r.favoriteLine)}</div>` : ''}`;
+  }
+
+  if (hasChecks) {
+    const total = Object.keys(WEEK3_TERMS).length;
+    const checked = Object.entries(checks).filter(([k, v]) => v).length;
+    html += `<h4 class="subsection-title">📚 핵심 용어 자가 체크 <span style="color:#5A9E3F; font-weight:800;">${checked}/${total}</span></h4>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:6px 12px; margin-bottom:14px;">
+        ${Object.entries(WEEK3_TERMS).map(([k, label]) => `
+          <div style="font-size:12.5px; color:${checks[k] ? '#1a3d0e' : '#94a3b8'}; ${checks[k] ? 'font-weight:700;' : ''}">
+            ${checks[k] ? '✓' : '○'} ${escapeHtml(label)}
+          </div>`).join('')}
+      </div>`;
+  }
+
+  if (hasConditions) {
+    const own = parseFloat(c.budgetOwn) || 0;
+    const loan = parseFloat(c.budgetLoan) || 0;
+    const max = (own + loan) > 0 ? Math.round((own + loan) / 1.04) : 0;
+    const lines = (c.lines || []).join(' · ');
+    html += `<h4 class="subsection-title">🎯 내가 사고 싶은 집의 조건</h4>
+      <div style="background:#FAFCF7; border:1px solid rgba(126,217,87,0.32); border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.9;">
+        ${(own || loan) ? `<div><b>💸 예산</b> · 자기자본 ${own.toLocaleString()}만 + 대출 ${loan.toLocaleString()}만 → 살 수 있는 집 <b style="color:#5A9E3F;">${max.toLocaleString()}만원</b></div>` : ''}
+        ${c.region ? `<div><b>📍 관심 지역</b> · ${escapeHtml(c.region)}</div>` : ''}
+        ${lines ? `<div><b>🚇 관심 노선</b> · ${escapeHtml(lines)}</div>` : ''}
+        ${c.size ? `<div><b>📐 평수</b> · ${escapeHtml(c.size)}</div>` : ''}
+        ${c.age ? `<div><b>🏗 연식</b> · ${escapeHtml(c.age)}</div>` : ''}
+        ${c.school ? `<div><b>📚 학군</b> · ${escapeHtml(c.school)}</div>` : ''}
+        ${c.movein ? `<div><b>📅 입주 시점</b> · ${escapeHtml(c.movein)}</div>` : ''}
+      </div>`;
+  }
+
+  return html;
+}
+
+const W4_CAP_LABELS = ['예금/CMA', '적금/청약', '주식·ETF·코인', '부모님 지원', '기타'];
+
+function renderWeek4(fd) {
+  const cap = fd.capital || [];
+  const loan = fd.loan || {};
+  const cands = fd.candidates || [];
+
+  const capSum = cap.reduce((a, b) => a + (parseFloat(b) || 0), 0);
+  const target = parseFloat(loan.targetPrice) || 0;
+  const ltv = parseFloat(loan.ltv) || 0;
+  const income = parseFloat(loan.income) || 0;
+  const debtMonthly = parseFloat(loan.debtMonthly) || 0;
+  const loanAmount = target > 0 && ltv > 0 ? Math.round(target * ltv / 100) : 0;
+  const dsrMonthly = income > 0 ? Math.max(0, Math.round((income * 0.4) / 12) - debtMonthly) : 0;
+  const maxBudget = (capSum + loanAmount) > 0 ? Math.round((capSum + loanAmount) / 1.04) : 0;
+
+  const hasAnyData = capSum > 0 || target > 0 || income > 0 || cands.some(c => c.name) || fd.memo;
+  if (!hasAnyData) return '';
+
+  const validCands = cands.filter(c => c.name);
+
+  return `
+    <h4 class="subsection-title">💰 자본금 현황</h4>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:14px;">
+      ${cap.map((v, i) => `
+        <div style="background:#FAFCF7; border:1px solid rgba(126,217,87,0.32); border-radius:10px; padding:10px 12px;">
+          <div style="font-size:11px; color:#5A9E3F; font-weight:700; margin-bottom:4px;">${W4_CAP_LABELS[i] || ''}</div>
+          <div style="font-size:14px; font-weight:800; color:#1a3d0e;">${(parseFloat(v) || 0).toLocaleString()}<small style="color:#94a3b8; font-size:11px; font-weight:600;"> 만원</small></div>
+        </div>`).join('')}
+    </div>
+    <div style="background:linear-gradient(135deg, #1a3d0e 0%, #2d5e1c 100%); color:#fff; border-radius:10px; padding:12px 16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:12px; color:#a3d984; font-weight:700;">자본금 합계</span>
+      <span style="font-size:18px; font-weight:900;">${capSum.toLocaleString()} 만원</span>
+    </div>
+
+    <h4 class="subsection-title">🏦 대출 가능액 시뮬레이션</h4>
+    <div style="background:#FAFCF7; border:1px solid rgba(126,217,87,0.32); border-radius:10px; padding:14px 16px; margin-bottom:14px; font-size:13px; line-height:1.9;">
+      ${target ? `<div><b>🎯 노리는 집 가격</b> · ${target.toLocaleString()} 만원${loan.loanType ? ` (${escapeHtml(loan.loanType)})` : ''}</div>` : ''}
+      ${ltv ? `<div><b>📊 LTV</b> · ${ltv}%</div>` : ''}
+      ${income ? `<div><b>💵 세전 연봉</b> · ${income.toLocaleString()} 만원</div>` : ''}
+      ${debtMonthly ? `<div><b>💳 기존 부채 월 상환</b> · ${debtMonthly.toLocaleString()} 만원</div>` : ''}
+      ${loanAmount ? `<div style="margin-top:6px; padding-top:8px; border-top:1px dashed rgba(180, 83, 9, 0.3);"><b style="color:#B45309;">💸 받을 수 있는 대출</b> · <b style="color:#B45309; font-size:15px;">${loanAmount.toLocaleString()} 만원</b></div>` : ''}
+      ${dsrMonthly ? `<div><b style="color:#B45309;">📋 DSR 월 가용 상환액</b> · ${dsrMonthly.toLocaleString()} 만원</div>` : ''}
+    </div>
+
+    ${maxBudget ? `
+      <div style="background:linear-gradient(135deg, #1a3d0e 0%, #2d5e1c 100%); color:#fff; border-radius:12px; padding:18px 20px; margin-bottom:18px; text-align:center;">
+        <div style="font-size:11px; color:#7ED957; font-weight:800; letter-spacing:0.04em; margin-bottom:6px;">🎯 매수 가능 예산</div>
+        <div style="font-size:24px; font-weight:900;">${maxBudget.toLocaleString()} 만원</div>
+        <div style="font-size:11px; color:#a3d984; margin-top:4px;">= (자본금 ${capSum.toLocaleString()} + 대출 ${loanAmount.toLocaleString()}) ÷ 1.04</div>
+      </div>
+    ` : ''}
+
+    ${validCands.length ? `
+      <h4 class="subsection-title">📍 관심 단지 (${validCands.length}곳)</h4>
+      <table style="width:100%; border-collapse:collapse; margin-bottom:14px; font-size:13px;">
+        <thead>
+          <tr style="background:#F0FAE9; color:#5A9E3F;">
+            <th style="text-align:left; padding:8px 10px; border-bottom:1px solid #d8e3d2;">순위</th>
+            <th style="text-align:left; padding:8px 10px; border-bottom:1px solid #d8e3d2;">단지</th>
+            <th style="text-align:left; padding:8px 10px; border-bottom:1px solid #d8e3d2;">지역</th>
+            <th style="text-align:left; padding:8px 10px; border-bottom:1px solid #d8e3d2;">평형</th>
+            <th style="text-align:right; padding:8px 10px; border-bottom:1px solid #d8e3d2;">호가</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${cands.map((c, i) => c.name ? `
+            <tr>
+              <td style="padding:8px 10px; border-bottom:1px solid #f1f5f9; color:#5A9E3F; font-weight:700;">${i + 1}순위</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #f1f5f9; font-weight:600;">${escapeHtml(c.name)}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">${escapeHtml(c.region || '—')}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">${escapeHtml(c.size || '—')}</td>
+              <td style="padding:8px 10px; border-bottom:1px solid #f1f5f9; text-align:right; font-weight:700; color:#1a3d0e;">${c.price ? Number(c.price).toLocaleString() + ' 만원' : '—'}</td>
+            </tr>` : '').join('')}
+        </tbody>
+      </table>
+    ` : ''}
+
+    ${fd.memo ? `
+      <h4 class="subsection-title">🗒 임장 계획 / 메모</h4>
+      <div style="background:#FFFBEB; border-left:3px solid #FCD34D; padding:10px 14px; border-radius:6px; margin-bottom:14px; font-size:13px; line-height:1.6; white-space:pre-wrap;">${escapeHtml(fd.memo)}</div>
+    ` : ''}
+  `;
+}
+
+function isImageFile(path) {
+  return /\.(png|jpe?g|gif|webp|bmp|heic|svg)$/i.test(String(path || ''));
+}
+function fileIcon(name) {
+  const s = String(name || '').toLowerCase();
+  if (/\.(xlsx|xls)$/.test(s)) return '📊';
+  if (/\.(pdf)$/.test(s)) return '📕';
+  if (/\.(docx?|hwp)$/.test(s)) return '📝';
+  return '📎';
+}
+
+function renderProof(a) {
+  if (!a.proof_text && !a.assignment_images?.length) return '';
+  return `
+    ${a.proof_text ? `<h4 class="subsection-title">💬 인증 글</h4><div class="proof-text">${escapeHtml(a.proof_text)}</div>` : ''}
+    ${a.assignment_images?.length ? `
+      <h4 class="subsection-title">📎 첨부 자료</h4>
+      <div class="proof-gallery">
+        ${a.assignment_images.map(img => {
+          if (!img.url) return `<div class="proof-img">📎 미리보기 없음</div>`;
+          const path = img.storage_path || '';
+          const name = path.split('/').pop() || '첨부 파일';
+          if (isImageFile(path)) {
+            return `<a href="${escapeHtml(img.url)}" target="_blank" rel="noopener" title="${escapeHtml(name)}"><div class="proof-img" style="background-image:url('${escapeHtml(img.url)}');background-size:cover;background-position:center;"></div></a>`;
+          } else {
+            return `<a class="proof-file" href="${escapeHtml(img.url)}" download="${escapeHtml(name)}" target="_blank" rel="noopener" title="${escapeHtml(name)}">
+              <div class="file-icon">${fileIcon(name)}</div>
+              <div class="file-name">${escapeHtml(name.length > 24 ? name.slice(0, 22) + '…' : name)}</div>
+              <div class="file-hint">⬇ 다운로드</div>
+            </a>`;
+          }
+        }).join('')}
+      </div>` : ''}`;
+}
+
+function renderWeekCard(meta, a) {
+  const now = Date.now();
+  const unlockTs = new Date(meta.unlock + 'T00:00:00').getTime();
+  const locked = now < unlockTs;
+  let statusBadge = '<span class="week-status locked">🔒 미공개</span>';
+  let body = '', timestamp = '';
+
+  if (locked) {
+    body = `<div class="empty-state"><div class="em">🔒</div><div class="text">${fmtDateShort(meta.unlock)} 공개 예정 · ${fmtDateShort(meta.due)} 마감</div></div>`;
+  } else if (!a) {
+    statusBadge = '<span class="week-status pending">⏰ 미작성</span>';
+    body = `<div class="empty-state"><div class="em">⏰</div><div class="text">아직 작성하지 않았어요. ${fmtDateShort(meta.due)} 마감.</div></div>`;
+  } else {
+    if (a.status === 'submitted') {
+      statusBadge = '<span class="week-status submitted">✓ 제출 완료</span>';
+      timestamp = a.submitted_at ? `<span class="submitted-time">${fmtDateTime(a.submitted_at)} 제출</span>` : '';
+    } else {
+      statusBadge = '<span class="week-status draft">📝 임시 저장</span>';
+      timestamp = a.updated_at ? `<span class="submitted-time">${fmtDateTime(a.updated_at)} 마지막 수정</span>` : '';
+    }
+    body = `<div class="submission-body">${renderAssetTable(a.form_data || {})}${renderRoadmap(a.form_data || {})}${renderWeek3(a.form_data || {})}${renderWeek4(a.form_data || {})}${renderProof(a)}</div>`;
+  }
+
+  return `
+    <article class="submission-card ${locked ? 'locked' : ''}">
+      <div class="submission-head">
+        <div class="submission-head-left">
+          <span class="week-tag">WEEK ${String(meta.n).padStart(2,'0')}</span>
+          <h3 class="week-title">${meta.title}</h3>
+          ${timestamp}
+        </div>
+        ${statusBadge}
+      </div>
+      ${body}
+    </article>`;
+}
+
+function renderNotesCard(notes) {
+  const list = notes.map(n => `
+    <div style="margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--border-soft);border-radius:10px;">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">${escapeHtml(n.author?.nickname || '관리자')} · ${fmtDateTime(n.updated_at)}</div>
+      <div style="font-size:13px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(n.content)}</div>
+    </div>`).join('');
+  return `
+    <div class="admin-note-card">
+      <div class="head">📌 관리자 메모 (수강생에게 보이지 않음)</div>
+      <textarea id="new-note" placeholder="이 수강생에 대한 메모를 남겨주세요."></textarea>
+      <div class="note-actions">
+        <button class="btn btn-primary btn-tiny" id="btn-add-note">메모 추가</button>
+      </div>
+      ${list}
+    </div>`;
+}
+
+async function load() {
+  if (!studentId) {
+    document.getElementById('submissions-area').innerHTML =
+      '<div style="text-align:center;padding:60px 20px;color:var(--color-urgent);">수강생 ID가 없어요. 대시보드에서 다시 들어와주세요.</div>';
+    return;
+  }
+  try {
+    const r = await fetch('/api/admin/student?id=' + encodeURIComponent(studentId), { cache: 'no-store' });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      document.getElementById('submissions-area').innerHTML =
+        `<div style="text-align:center;padding:60px 20px;color:var(--color-urgent);">불러오기 실패: ${err.error || r.status}</div>`;
+      return;
+    }
+    const { student, assignments, notes } = await r.json();
+    const byWeek = {};
+    for (const a of assignments || []) byWeek[a.week] = a;
+
+    renderProfile(student, byWeek);
+    renderQuickStats(byWeek);
+
+    const cards = WEEKS.map(meta => renderWeekCard(meta, byWeek[meta.n])).join('');
+    const notesHtml = renderNotesCard(notes || []);
+    document.getElementById('submissions-area').innerHTML = cards + notesHtml;
+
+    document.getElementById('tab-submissions-count').textContent =
+      [1,2,3,4].filter(n => byWeek[n]?.status === 'submitted').length;
+    document.getElementById('tab-notes-count').textContent = (notes || []).length;
+
+    document.getElementById('btn-add-note')?.addEventListener('click', async () => {
+      const ta = document.getElementById('new-note');
+      const content = ta.value.trim();
+      if (!content) return;
+      try {
+        const res = await fetch('/api/admin/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ student_id: studentId, content }),
+        });
+        if (!res.ok) throw new Error('save failed');
+        await load();
+      } catch (e) {
+        alert('메모 저장 실패: ' + e.message);
+      }
+    });
+  } catch (e) {
+    console.error('student load error', e);
+    document.getElementById('submissions-area').innerHTML =
+      `<div style="text-align:center;padding:60px 20px;color:var(--color-urgent);">오류: ${e.message}</div>`;
+  }
+}
+
+document.addEventListener('auth-ready', (e) => {
+  const user = e.detail || {};
+  const nick = document.querySelector('.nav-user .nick');
+  if (nick) nick.textContent = user.nickname || '관리자';
+  load();
+});
+
+document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  location.href = '/api/auth/logout';
+});
+
+// ===== 강퇴 / 복구 =====
+function openBanModal() {
+  const modal = document.getElementById('ban-modal');
+  document.getElementById('ban-reason').value = '';
+  document.getElementById('ban-target-nick').textContent = currentStudent?.nickname || '이 수강생';
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('ban-reason').focus(), 50);
+}
+function closeBanModal() {
+  document.getElementById('ban-modal').classList.remove('open');
+}
+
+async function submitBan() {
+  const reason = document.getElementById('ban-reason').value.trim();
+  const btn = document.getElementById('ban-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = '처리 중…';
+  try {
+    const res = await fetch('/api/admin/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, banned: true, reason }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || '강퇴 실패');
+    }
+    closeBanModal();
+    await load();
+  } catch (e) {
+    alert('강퇴 처리 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🚫 강퇴 확정';
+  }
+}
+
+async function submitUnban() {
+  if (!confirm(`${currentStudent?.nickname || '이 수강생'}의 강퇴를 해제하시겠어요?\n다시 강의실에 접근할 수 있어요.`)) return;
+  const btn = document.getElementById('btn-unban');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/admin/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: studentId, banned: false }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || '해제 실패');
+    }
+    await load();
+  } catch (e) {
+    alert('강퇴 해제 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// 모달 HTML이 이 스크립트 뒤에 있어서 getElementById 시점에 null —
+// document 단위 delegation으로 처리 (DOM 순서 무관하게 작동)
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#btn-expel')) { e.preventDefault(); openBanModal(); return; }
+  if (e.target.closest('#btn-unban')) { e.preventDefault(); submitUnban(); return; }
+  if (e.target.closest('#ban-cancel-btn')) { e.preventDefault(); closeBanModal(); return; }
+  if (e.target.closest('#ban-confirm-btn')) { e.preventDefault(); submitBan(); return; }
+  if (e.target.id === 'ban-modal') { closeBanModal(); }
+});
+</script>
+
+<!-- ===== 강퇴 확인 모달 ===== -->
+<div class="modal-backdrop" id="ban-modal">
+  <div class="modal-card">
+    <h3>🚫 강퇴 확인</h3>
+    <p class="modal-desc">
+      <b id="ban-target-nick">이 수강생</b>을(를) 강퇴하시겠어요?<br>
+      이 학생은 다음 페이지 이동/로그인 시 즉시 차단되고, 강의실·과제 접근이 모두 막혀요. 언제든 "강퇴 해제"로 복구할 수 있어요.
+    </p>
+    <label for="ban-reason">사유 <span style="color:var(--text-muted); font-weight:500;">(선택, 학생에게 표시됩니다)</span></label>
+    <textarea id="ban-reason" placeholder="예) 1주차 과제 미제출 + 연락 두절"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="ban-cancel-btn">취소</button>
+      <button class="btn btn-danger" id="ban-confirm-btn">🚫 강퇴 확정</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
